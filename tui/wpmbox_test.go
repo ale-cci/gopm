@@ -119,7 +119,7 @@ func TestWpmBox(t *testing.T) {
 
 	t.Run("incCursor", func(t *testing.T) {
 		t.Run("Cursor should follow new line", func(t *testing.T) {
-			box := NewWpmBox(0, 0, 0, 0, "\n")
+			box := NewWpmBox(0, 0, 0, 4, "\n")
 			box.incCursor()
 			if box.line != 1 || box.cursor != 0 {
 				t.Errorf("Wrong cursor position: (%d, %d) expected (0, 1)", box.cursor, box.line)
@@ -127,7 +127,7 @@ func TestWpmBox(t *testing.T) {
 		})
 
 		t.Run("Cursor should follow new line when line is ended", func(t *testing.T) {
-			box := NewWpmBox(0, 0, 0, 0, "test\nline")
+			box := NewWpmBox(0, 0, 0, 4, "test\nline")
 
 			box.InsKey('t')
 			box.InsKey('e')
@@ -204,7 +204,7 @@ func TestWpmBox(t *testing.T) {
 		})
 
 		t.Run("Should return to previous line on backpress", func(t *testing.T) {
-			box := NewWpmBox(0, 0, 0, 0, "test\n")
+			box := NewWpmBox(0, 0, 0, 4, "test\n")
 			box.InsKey('t')
 			box.InsKey('e')
 			box.InsKey('s')
@@ -215,6 +215,32 @@ func TestWpmBox(t *testing.T) {
 			if box.cursor != 4 || box.line != 0 {
 				t.Errorf("Unexpected cursor position: (%d, %d), expected (4, 0)", box.cursor, box.line)
 			}
+		})
+	})
+
+	t.Run("Scrolloff", func(t *testing.T) {
+		t.Run("Should increase offset if cursor exceeds scrolloff", func(t *testing.T) {
+			// container of height 5 with scrolloff 3
+			box := NewWpmBox(0, 0, 0, 5, "\n\n\n\n\n\n\n\n")
+			box.ScrollOff = 3
+
+			box.InsKey('\n')
+			box.InsKey('\n')
+			box.InsKey('\n')
+
+			got := box.offset
+			expect := 1
+			if got != expect {
+				t.Errorf("Wrong offset: %d, expected %d", got, expect)
+			}
+
+			got = box.line
+			expect = 2
+
+			if got != expect {
+				t.Errorf("Unexpected cursor position: %d, expected %d", got, expect)
+			}
+
 		})
 	})
 }

@@ -18,6 +18,7 @@ type App struct {
 func (app *App) Build(maxX int, maxY int) []tui.Widget {
 	text := app.qi.Current().Text
 	app.box = tui.NewWpmBox(1, 1, maxX-2, maxY-2, text)
+	app.box.ScrollOff = 4
 
 	return []tui.Widget{app.box}
 }

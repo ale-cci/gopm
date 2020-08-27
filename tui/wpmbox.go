@@ -6,6 +6,13 @@ import (
 	"strings"
 )
 
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
 type WpmBox struct {
 	x, y int
 	w, h int
@@ -14,6 +21,9 @@ type WpmBox struct {
 
 	line, cursor int
 	CurrentText  quotes.CurrentText
+
+	ScrollOff int
+	offset    int
 }
 
 // Possible text character statuses
@@ -27,6 +37,7 @@ const (
 func NewWpmBox(x int, y int, w int, h int, text string) *WpmBox {
 	box := &WpmBox{x: x, y: y, w: w, h: h}
 	box.SetText(text)
+	box.offset = 0
 	return box
 }
 
@@ -83,8 +94,12 @@ func (w *WpmBox) Draw() {
 
 	// Draw box content
 	currentChar := 0
-	for y, chars := range w.textStructure {
-		for x := 0; x < chars; x++ {
+	for l := 0; l < w.offset; l++ {
+		currentChar += w.textStructure[l]
+	}
+
+	for y := 0; y < min(w.h, len(w.textStructure)-w.offset); y++ {
+		for x := 0; x < w.textStructure[w.offset+y]; x++ {
 			// Determine color based on correctness
 			fg, bg := w.cellColor(currentChar)
 			char := w.RuneAt(currentChar)
@@ -114,7 +129,12 @@ func (w *WpmBox) Backspace() {
 
 func (w *WpmBox) incCursor() {
 	if w.CurrentText.CurrentRune() == '\n' {
-		w.line++
+		if w.h-w.line > w.ScrollOff {
+			w.line++
+		} else {
+			w.offset++
+		}
+
 		w.cursor = 0
 	} else {
 		w.cursor++
