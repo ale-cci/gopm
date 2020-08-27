@@ -251,6 +251,20 @@ func TestWpmBox(t *testing.T) {
 		}
 	})
 
+	t.Run("Should not set negative scrolloff", func(t *testing.T) {
+		box := NewWpmBox(0, 0, 0, 20, "a\n\n")
+		box.ScrollOff = 3
+		box.InsKey('a')
+		box.InsKey('\n')
+		box.Backspace()
+
+		expect := box.offset
+		got := 0
+
+		if got != expect {
+			t.Errorf("Wrong offset value: %d, expected %d", got, expect)
+		}
+	})
 	t.Run("Scrolloff", func(t *testing.T) {
 		t.Run("Should increase offset if cursor exceeds scrolloff", func(t *testing.T) {
 			// container of height 5 with scrolloff 3
@@ -273,6 +287,34 @@ func TestWpmBox(t *testing.T) {
 			if got != expect {
 				t.Errorf("Unexpected cursor position: %d, expected %d", got, expect)
 			}
+		})
+
+		t.Run("Should decrease offset correctly if cursor moves up", func(t *testing.T) {
+			box := NewWpmBox(0, 0, 0, 6, "\n\n\n\n\n\n\n")
+			box.ScrollOff = 3
+			box.InsKey('\n')
+			box.InsKey('\n')
+			box.InsKey('\n')
+			box.InsKey('\n')
+			box.Backspace()
+
+			got := box.offset
+			expect := 0
+
+			if got != expect {
+				t.Errorf("Wrong offset: %d, expected: %d", got, expect)
+			}
+		})
+
+		t.Run("Should scroll till the end of text", func(t *testing.T) {
+			box := NewWpmBox(0, 0, 0, 6, "\n\n\n\n\n\n\n")
+			box.ScrollOff = 4
+			box.InsKey('\n')
+			box.InsKey('\n')
+			box.InsKey('\n')
+			box.InsKey('\n')
+			box.InsKey('\n')
+			box.InsKey('\n')
 
 		})
 	})

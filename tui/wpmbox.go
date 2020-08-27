@@ -15,11 +15,11 @@ func min(a, b int) int {
 }
 
 type WpmBox struct {
-	x, y int
-	w, h int
-	// current line of text and cursor position relative to the line
+	x, y          int
+	w, h          int
 	textStructure []int
 
+	// current line and position of cursor on the screen
 	line, cursor int
 	CurrentText  quotes.CurrentText
 
@@ -109,7 +109,6 @@ func (w *WpmBox) Draw() {
 
 	// Draw box content
 	for y := 0; y < min(w.h, len(w.textStructure)-w.offset); y++ {
-		lineOffset := 0
 		for x := 0; x < w.textStructure[w.offset+y]; x++ {
 			fg, bg := w.cellColor(currentChar)
 
@@ -117,9 +116,9 @@ func (w *WpmBox) Draw() {
 			parsedChar := parseRune(currChar)
 			size := runeSize(currChar)
 
-			termbox.SetCell(w.x+x+lineOffset, w.y+y, parsedChar, fg, bg)
+			termbox.SetCell(w.x+x, w.y+y, parsedChar, fg, bg)
 			currentChar++
-			lineOffset += (size - 1)
+			x += (size - 1)
 		}
 	}
 
@@ -160,7 +159,13 @@ func (w *WpmBox) decCursor() {
 	if w.cursor > 0 {
 		w.cursor -= runeSize(c)
 	} else if w.line > 0 {
-		w.line--
-		w.cursor = w.textStructure[w.line] - 1
+		if w.line-w.offset > w.ScrollOff {
+			w.line--
+		} else if w.offset > 0 {
+			w.offset--
+		} else {
+			w.line--
+		}
+		w.cursor = w.textStructure[w.line+w.offset] - 1
 	}
 }
