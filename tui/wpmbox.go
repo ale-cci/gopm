@@ -115,16 +115,17 @@ func (w *WpmBox) Draw() {
 
 	// Draw box content
 	for y := 0; y < min(w.h, len(w.textStructure)-w.offset); y++ {
-		for x := 0; x < w.textStructure[w.offset+y]; x++ {
+		for x := 0; x < w.textStructure[w.offset+y]; {
 			fg, bg := w.cellColor(currentChar)
 
 			currChar := w.CurrentText.RuneAt(currentChar)
 			parsedChar := parseRune(currChar)
-			size := runeSize(currChar)
 
 			termbox.SetCell(w.x+x, w.y+y, parsedChar, fg, bg)
 			currentChar++
-			x += (size - 1)
+
+			size := runeSize(currChar)
+			x += size
 		}
 	}
 
@@ -150,8 +151,10 @@ func (w *WpmBox) incCursor() {
 	if w.CurrentText.CurrentRune() == '\n' {
 		if w.h-w.line > w.ScrollOff {
 			w.line++
-		} else {
+		} else if w.line+w.offset+w.ScrollOff < len(w.textStructure)-1 {
 			w.offset++
+		} else {
+			w.line++
 		}
 
 		w.cursor = 0

@@ -307,7 +307,7 @@ func TestWpmBox(t *testing.T) {
 		})
 
 		t.Run("Should scroll till the end of text", func(t *testing.T) {
-			box := NewWpmBox(0, 0, 0, 6, "\n\n\n\n\n\n\n")
+			box := NewWpmBox(0, 0, 0, 6, "\n\n\n\n\n\n\n\n")
 			box.ScrollOff = 4
 			box.InsKey('\n')
 			box.InsKey('\n')
@@ -315,7 +315,15 @@ func TestWpmBox(t *testing.T) {
 			box.InsKey('\n')
 			box.InsKey('\n')
 			box.InsKey('\n')
+			box.InsKey('\n')
+			box.InsKey('\n')
 
+			got := box.offset
+			expect := 2
+
+			if got != expect {
+				t.Errorf("Wrong offset: %d, expected: %d", got, expect)
+			}
 		})
 	})
 }
