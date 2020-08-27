@@ -23,3 +23,13 @@ func LoadFromJson(file io.Reader) ([]Quote, error) {
 
 	return quotes, nil
 }
+
+func LoadFile(file io.Reader) (*Quote, error) {
+	bytes, err := ioutil.ReadAll(file)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &Quote{Text: string(bytes)}, nil
+}

@@ -58,6 +58,8 @@ func (w *WpmBox) RuneAt(position int) rune {
 		return '·'
 	case '\n':
 		return '↩'
+	case '\t':
+		return '⇥'
 	default:
 		return char
 	}

@@ -64,6 +64,17 @@ func TestWpmBox(t *testing.T) {
 		}
 	})
 
+	t.Run("Should parse tabs correctly", func(t *testing.T) {
+		box := NewWpmBox(0, 0, 0, 0, "a\tb")
+
+		got := box.RuneAt(1)
+		expected := '⇥'
+
+		if got != expected {
+			t.Errorf("Newline parsed incorrectly, got: %q, expected %q", got, expected)
+		}
+	})
+
 	t.Run("Should clear previous text", func(t *testing.T) {
 		text := "First string"
 		box := NewWpmBox(0, 0, 0, 0, text)

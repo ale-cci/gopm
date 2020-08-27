@@ -30,6 +30,8 @@ func (app *App) OnEvent(ev termbox.Event) bool {
 			app.box.InsKey(' ')
 		case termbox.KeyEnter:
 			app.box.InsKey('\n')
+		case termbox.KeyTab:
+			app.box.InsKey('\t')
 
 		case termbox.KeyBackspace, termbox.KeyBackspace2:
 			app.box.Backspace()
@@ -54,17 +56,27 @@ func NewApp(qi *quotes.QuoteIterator) *App {
 }
 
 func main() {
-	file, err := os.Open("default.json")
+	file, err := os.Open("gopm.go")
+	if err != nil {
+		panic(err)
+	}
 	defer file.Close()
 
-	if err != nil {
-		panic(err)
-	}
+	quote, _ := quotes.LoadFile(file)
+	quoteList := []quotes.Quote{*quote}
 
-	quoteList, err := quotes.LoadFromJson(file)
-	if err != nil {
-		panic(err)
-	}
+	/*
+		file, err := os.Open("default.json")
+		defer file.Close()
+
+		if err != nil {
+			panic(err)
+		}
+		quoteList, err := quotes.LoadFromJson(file)
+		if err != nil {
+			panic(err)
+		}
+	*/
 
 	qi := quotes.NewQuoteIterator(quoteList)
 	app := NewApp(qi)
