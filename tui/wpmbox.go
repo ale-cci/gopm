@@ -15,6 +15,12 @@ type WpmBox struct {
 	wrong, correct int
 }
 
+const (
+	CELL_WRONG = 0
+	CELL_RIGHT = 1
+	CELL_BLANK = 2
+)
+
 func NewWpmBox(x int, y int, w int, h int, text []rune) *WpmBox {
 	box := &WpmBox{x: x, y: y, w: w, h: h, text: text}
 	box.SetText(text)
@@ -44,13 +50,24 @@ func (w *WpmBox) SetText(text []rune) {
 }
 
 func (w *WpmBox) cellColor(currentChar int) (termbox.Attribute, termbox.Attribute) {
-	switch {
-	case currentChar < w.correct:
+	switch w.CellType(currentChar) {
+	case CELL_RIGHT:
 		return termbox.ColorGreen, termbox.ColorDefault
-	case currentChar >= w.correct && currentChar < w.wrong:
-		return termbox.ColorRed, termbox.ColorDefault
+	case CELL_WRONG:
+		return termbox.ColorMagenta, termbox.ColorDefault
 	default:
 		return termbox.ColorDefault, termbox.ColorDefault
+	}
+}
+
+func (w *WpmBox) CellType(currentChar int) int {
+	switch {
+	case currentChar < w.correct:
+		return CELL_RIGHT
+	case currentChar >= w.correct && currentChar < w.correct+w.wrong:
+		return CELL_WRONG
+	default:
+		return CELL_BLANK
 	}
 }
 
@@ -73,14 +90,17 @@ func (w *WpmBox) Draw() {
 }
 
 func (w *WpmBox) InsKey(key rune) {
-	idx := w.correct + w.wrong
+	if w.TextEnded() {
+		return
+	}
 
-	if w.text[idx] != key || w.wrong >= 1 {
+	w.incCursor()
+
+	if w.CurrentRune() != key || w.wrong >= 1 {
 		w.wrong += 1
 	} else {
 		w.correct += 1
 	}
-	w.incCursor()
 }
 
 func (w *WpmBox) Backspace() {
@@ -92,8 +112,30 @@ func (w *WpmBox) Backspace() {
 	w.decCursor()
 }
 
+func (w *WpmBox) TextEnded() bool {
+	idx := w.correct + w.wrong
+	return idx == len(w.text)
+}
+
+func (w *WpmBox) CurrentRune() rune {
+	idx := w.correct + w.wrong
+	return w.text[idx]
+}
+
 func (w *WpmBox) incCursor() {
+	if w.CurrentRune() == '\n' {
+		w.line++
+		w.cursor = 0
+	} else {
+		w.cursor++
+	}
 }
 
 func (w *WpmBox) decCursor() {
+	if w.cursor > 0 {
+		w.cursor--
+	} else if w.line > 0 {
+		w.line--
+		w.cursor = len(w.buffer[w.line]) - 1
+	}
 }
