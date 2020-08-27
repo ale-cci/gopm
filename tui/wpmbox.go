@@ -44,7 +44,6 @@ const (
 func NewWpmBox(x int, y int, w int, h int, text string) *WpmBox {
 	box := &WpmBox{x: x, y: y, w: w, h: h}
 	box.SetText(text)
-	box.offset = 0
 	return box
 }
 
@@ -53,6 +52,7 @@ func (w *WpmBox) SetText(text string) {
 	// Reset cursor position
 	w.cursor = 0
 	w.line = 0
+	w.offset = 0
 
 	w.CurrentText = quotes.CurrentText{Text: text}
 

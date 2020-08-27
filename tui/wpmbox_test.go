@@ -102,6 +102,20 @@ func TestWpmBox(t *testing.T) {
 		}
 	})
 
+	t.Run("Offset should be resetted if new text is provided", func(t *testing.T) {
+		box := NewWpmBox(0, 0, 0, 1, "\n\n\n")
+		box.InsKey('\n')
+		box.InsKey('\n')
+		box.InsKey('\n')
+		box.SetText("test")
+
+		expect := 0
+		got := box.offset
+		if expect != got {
+			t.Errorf("Offset not resetted: %d expected %d", got, expect)
+		}
+	})
+
 	t.Run("Cursor should normally advance horizontally", func(t *testing.T) {
 		box := NewWpmBox(0, 0, 0, 0, "Example")
 		box.incCursor()
