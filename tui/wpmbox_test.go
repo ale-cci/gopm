@@ -235,6 +235,22 @@ func TestWpmBox(t *testing.T) {
 		})
 	})
 
+	t.Run("Should correctly set cursor position when previous line has characters of length > 1", func(t *testing.T) {
+		box := NewWpmBox(0, 0, 0, 20, "a\t\n")
+		box.InsKey('a')
+		box.InsKey('a')
+		box.InsKey('\n')
+
+		box.Backspace()
+
+		expected := 5
+		got := box.cursor
+
+		if got != expected || box.line != 0 {
+			t.Errorf("Wrong cursor position: (%d, %d) expected: (%d, 0)", got, box.line, expected)
+		}
+	})
+
 	t.Run("Scrolloff", func(t *testing.T) {
 		t.Run("Should increase offset if cursor exceeds scrolloff", func(t *testing.T) {
 			// container of height 5 with scrolloff 3

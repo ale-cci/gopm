@@ -54,7 +54,10 @@ func (w *WpmBox) SetText(text string) {
 	w.textStructure = make([]int, len(lines))
 
 	for i, line := range lines {
-		w.textStructure[i] = len(line)
+		// w.textStructure[i] = len(line)
+		for _, char := range line {
+			w.textStructure[i] += runeSize(char)
+		}
 
 		// new line character to all lines except last one
 		if i != len(lines)-1 {
@@ -99,16 +102,15 @@ func (w *WpmBox) cellColor(currentChar int) (termbox.Attribute, termbox.Attribut
 func (w *WpmBox) Draw() {
 	DrawBox(w.x, w.y, w.w, w.h)
 
-	// Draw box content
 	currentChar := 0
 	for l := 0; l < w.offset; l++ {
 		currentChar += w.textStructure[l]
 	}
 
+	// Draw box content
 	for y := 0; y < min(w.h, len(w.textStructure)-w.offset); y++ {
 		lineOffset := 0
 		for x := 0; x < w.textStructure[w.offset+y]; x++ {
-			// Determine color based on correctness
 			fg, bg := w.cellColor(currentChar)
 
 			currChar := w.CurrentText.RuneAt(currentChar)

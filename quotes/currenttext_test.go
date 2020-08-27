@@ -3,11 +3,11 @@ package quotes
 import "testing"
 
 func TestCurrent(t *testing.T) {
-	t.Run("Should correctly intialize", func(t *testing.T) {
+	t.Run("Should correctly initialize ", func(t *testing.T) {
 		currentText := CurrentText{Text: "Test", Author: "Myself"}
 
 		if currentText.correct != 0 || currentText.wrong != 0 {
-			t.Errorf("Wrong CurrentText intialization")
+			t.Errorf("Wrong CurrentText initialize")
 		}
 	})
 
@@ -18,7 +18,7 @@ func TestCurrent(t *testing.T) {
 		expected := BLANK
 
 		if got != expected {
-			t.Errorf("Wrong character staus for unvisited character: %v, expected %v", got, expected)
+			t.Errorf("Wrong character status for unvisited character: %v, expected %v", got, expected)
 		}
 	})
 
@@ -30,7 +30,7 @@ func TestCurrent(t *testing.T) {
 		expected := RIGHT
 
 		if got != expected {
-			t.Errorf("Wrong character staus for right character: %v, expected %v", got, expected)
+			t.Errorf("Wrong character status for right character: %v, expected %v", got, expected)
 		}
 	})
 
@@ -42,7 +42,7 @@ func TestCurrent(t *testing.T) {
 		expected := WRONG
 
 		if got != expected {
-			t.Errorf("Wrong character staus for wrong character: %v, expected %v", got, expected)
+			t.Errorf("Wrong character status for wrong character: %v, expected %v", got, expected)
 		}
 	})
 
@@ -55,26 +55,26 @@ func TestCurrent(t *testing.T) {
 		expected := RIGHT
 
 		if got != expected {
-			t.Errorf("Wrong character staus for character: %v, expected %v", got, expected)
+			t.Errorf("Wrong character status for character: %v, expected %v", got, expected)
 		}
 
 		got = ct.CharStatus(1)
 		expected = WRONG
 
 		if got != expected {
-			t.Errorf("Wrong character staus for character: %v, expected %v", got, expected)
+			t.Errorf("Wrong character status for character: %v, expected %v", got, expected)
 		}
 
 		got = ct.CharStatus(2)
 		expected = BLANK
 
 		if got != expected {
-			t.Errorf("Wrong character staus for character: %v, expected %v", got, expected)
+			t.Errorf("Wrong character status for character: %v, expected %v", got, expected)
 		}
 	})
 
 	t.Run("InsKey", func(t *testing.T) {
-		t.Run("Should insert detect correct key when inserted", func(t *testing.T) {
+		t.Run("InsKey should identify correct key", func(t *testing.T) {
 			ct := CurrentText{Text: "Abcd"}
 			ct.InsKey('A')
 
