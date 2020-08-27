@@ -15,16 +15,22 @@ func min(a, b int) int {
 }
 
 type WpmBox struct {
-	x, y          int
-	w, h          int
+	// Box coordintates
+	x, y int
+	w, h int
+
+	// Effective length of each line of the text
 	textStructure []int
 
 	// current line and position of cursor on the screen
 	line, cursor int
 	CurrentText  quotes.CurrentText
 
+	// When number of line from margin where screen scrolling should start
 	ScrollOff int
-	offset    int
+
+	// Number of lines hidden above
+	offset int
 }
 
 // Possible text character statuses

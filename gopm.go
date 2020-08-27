@@ -59,25 +59,30 @@ func NewApp(qi *quotes.QuoteIterator) *App {
 }
 
 func main() {
-	filename := flag.String("file", "", "test")
 	flag.Parse()
-
-	if *filename == "" {
-		panic("Flag --file not provided")
-	}
-	if _, err := os.Stat(*filename); os.IsNotExist(err) {
-		fmt.Printf("Unable to open file %q\n", *filename)
-		os.Exit(1)
+	files := flag.Args()
+	if len(files) == 0 {
+		panic("No files provided")
 	}
 
-	file, err := os.Open(*filename)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
+	quoteList := make([]quotes.Quote, len(files))
+	for i, filename := range files {
+		if _, err := os.Stat(filename); os.IsNotExist(err) {
+			fmt.Printf("Unable to open file %q\n", filename)
+			os.Exit(1)
+		}
+		file, err := os.Open(filename)
+		if err != nil {
+			panic(err)
+		}
+		defer file.Close()
 
-	quote, _ := quotes.LoadFile(file)
-	quoteList := []quotes.Quote{*quote}
+		quote, err := quotes.LoadFile(file)
+		quoteList[i] = *quote
+		if err != nil {
+			panic(err)
+		}
+	}
 
 	qi := quotes.NewQuoteIterator(quoteList)
 	app := NewApp(qi)
