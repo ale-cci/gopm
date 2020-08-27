@@ -1,9 +1,10 @@
 package tui
 
 import (
+	"strings"
+
 	"github.com/ale-cci/gopm/quotes"
 	"github.com/nsf/termbox-go"
-	"strings"
 )
 
 func min(a, b int) int {
@@ -62,8 +63,14 @@ func (w *WpmBox) SetText(text string) {
 	}
 }
 
-func (w *WpmBox) RuneAt(position int) rune {
-	char := w.CurrentText.RuneAt(position)
+func runeSize(char rune) int {
+	if char == '\t' {
+		return 4
+	}
+	return 1
+}
+
+func parseRune(char rune) rune {
 	switch char {
 	case ' ':
 		return '·'
@@ -99,13 +106,18 @@ func (w *WpmBox) Draw() {
 	}
 
 	for y := 0; y < min(w.h, len(w.textStructure)-w.offset); y++ {
+		lineOffset := 0
 		for x := 0; x < w.textStructure[w.offset+y]; x++ {
 			// Determine color based on correctness
 			fg, bg := w.cellColor(currentChar)
-			char := w.RuneAt(currentChar)
 
-			termbox.SetCell(w.x+x, w.y+y, char, fg, bg)
+			currChar := w.CurrentText.RuneAt(currentChar)
+			parsedChar := parseRune(currChar)
+			size := runeSize(currChar)
+
+			termbox.SetCell(w.x+x+lineOffset, w.y+y, parsedChar, fg, bg)
 			currentChar++
+			lineOffset += (size - 1)
 		}
 	}
 
@@ -137,13 +149,14 @@ func (w *WpmBox) incCursor() {
 
 		w.cursor = 0
 	} else {
-		w.cursor++
+		w.cursor += runeSize(w.CurrentText.CurrentRune())
 	}
 }
 
 func (w *WpmBox) decCursor() {
+	c := w.CurrentText.CurrentRune()
 	if w.cursor > 0 {
-		w.cursor--
+		w.cursor -= runeSize(c)
 	} else if w.line > 0 {
 		w.line--
 		w.cursor = w.textStructure[w.line] - 1

@@ -43,9 +43,7 @@ func TestWpmBox(t *testing.T) {
 	})
 
 	t.Run("Should parse spaces correctly", func(t *testing.T) {
-		box := NewWpmBox(0, 0, 0, 0, "a b")
-
-		got := box.RuneAt(1)
+		got := parseRune(' ')
 		expected := '·'
 
 		if got != expected {
@@ -54,9 +52,7 @@ func TestWpmBox(t *testing.T) {
 	})
 
 	t.Run("Should parse newline correctly", func(t *testing.T) {
-		box := NewWpmBox(0, 0, 0, 0, "a\nb")
-
-		got := box.RuneAt(1)
+		got := parseRune('\n')
 		expected := '↩'
 
 		if got != expected {
@@ -65,9 +61,7 @@ func TestWpmBox(t *testing.T) {
 	})
 
 	t.Run("Should parse tabs correctly", func(t *testing.T) {
-		box := NewWpmBox(0, 0, 0, 0, "a\tb")
-
-		got := box.RuneAt(1)
+		got := parseRune('\t')
 		expected := '⇥'
 
 		if got != expected {
@@ -179,7 +173,19 @@ func TestWpmBox(t *testing.T) {
 			if box.line != 0 || box.cursor != 4 {
 				t.Errorf("Wrong cursor position: (%d, %d) expected (0, 4)", box.line, box.cursor)
 			}
+		})
 
+		t.Run("Should advance cursor more if tab inserted", func(t *testing.T) {
+			box := NewWpmBox(0, 0, 0, 4, "A\tB")
+			box.InsKey('A')
+			box.InsKey('\t')
+
+			expected := 5
+			got := box.cursor
+
+			if got != expected {
+				t.Errorf("Wrong cursor position: %d, expected: %d", got, expected)
+			}
 		})
 	})
 
@@ -211,9 +217,20 @@ func TestWpmBox(t *testing.T) {
 			box.InsKey('t')
 			box.InsKey('\n')
 
-			box.decCursor()
+			box.Backspace()
 			if box.cursor != 4 || box.line != 0 {
 				t.Errorf("Unexpected cursor position: (%d, %d), expected (4, 0)", box.cursor, box.line)
+			}
+		})
+		t.Run("Should return to original position", func(t *testing.T) {
+			box := NewWpmBox(0, 0, 0, 4, "a\t")
+			box.InsKey('a')
+			box.InsKey('\t')
+			box.Backspace()
+			box.Backspace()
+
+			if box.cursor != 0 {
+				t.Errorf("Unexpected cursor position: (%d, %d), expected (0, 0)", box.cursor, box.line)
 			}
 		})
 	})
