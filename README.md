@@ -1,7 +1,7 @@
 # Typing practice on command line
 I love [cslarsen/wpm](https;://github.com/cslarsen/wpm), i use it almost everyday! so i wanted to make my own version on golang.
 
-![2020-08-27-114905_1918x1059_scrot](https://user-images.githubusercontent.com/24639564/91425501-80df3080-e85b-11ea-97e1-3aeadc099fa9.png)
+![2020-08-27-160713_1918x1059_scrot](https://user-images.githubusercontent.com/24639564/91452952-7e8ecd80-e87f-11ea-86c6-926c6c00f4e8.png)
 ### Usage
 ```
 go run gopm.go --file=<YOUR-FILE>
