@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"github.com/nsf/termbox-go"
 	"os"
 
@@ -56,7 +58,18 @@ func NewApp(qi *quotes.QuoteIterator) *App {
 }
 
 func main() {
-	file, err := os.Open("gopm.go")
+	filename := flag.String("file", "", "test")
+	flag.Parse()
+
+	if *filename == "" {
+		panic("Flag --file not provided")
+	}
+	if _, err := os.Stat(*filename); os.IsNotExist(err) {
+		fmt.Printf("Unable to open file %q\n", *filename)
+		os.Exit(1)
+	}
+
+	file, err := os.Open(*filename)
 	if err != nil {
 		panic(err)
 	}
@@ -64,19 +77,6 @@ func main() {
 
 	quote, _ := quotes.LoadFile(file)
 	quoteList := []quotes.Quote{*quote}
-
-	/*
-		file, err := os.Open("default.json")
-		defer file.Close()
-
-		if err != nil {
-			panic(err)
-		}
-		quoteList, err := quotes.LoadFromJson(file)
-		if err != nil {
-			panic(err)
-		}
-	*/
 
 	qi := quotes.NewQuoteIterator(quoteList)
 	app := NewApp(qi)

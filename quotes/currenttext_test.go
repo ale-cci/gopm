@@ -98,6 +98,20 @@ func TestCurrent(t *testing.T) {
 			}
 		})
 
+		t.Run("On error all next keystrokes should be error", func(t *testing.T) {
+			ct := CurrentText{Text: "Abcd"}
+			ct.InsKey('B')
+			ct.InsKey('b')
+			ct.InsKey('c')
+
+			got := ct.wrong
+			expected := 3
+
+			if got != expected {
+				t.Errorf("Wrong number of wrong characters: %d expected: %d", got, expected)
+			}
+		})
+
 		t.Run("Detect correct characters in succession", func(t *testing.T) {
 			ct := CurrentText{Text: "Test"}
 			ct.InsKey('T')

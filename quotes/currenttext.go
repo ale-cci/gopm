@@ -20,7 +20,7 @@ func (t *CurrentText) InsKey(char rune) {
 	if !t.IsEndPosition() {
 		current := t.CurrentRune()
 
-		if char == current {
+		if char == current && t.wrong == 0 {
 			t.correct += 1
 		} else {
 			t.wrong += 1
