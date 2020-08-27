@@ -1,73 +1,78 @@
 package tui
 
 import (
+	"github.com/ale-cci/gopm/quotes"
 	"github.com/nsf/termbox-go"
 	"strings"
 )
 
 type WpmBox struct {
-	buffer [][]termbox.Cell
-	text   []rune
-	x, y   int
-	w, h   int
+	x, y int
+	w, h int
 	// current line of text and cursor position relative to the line
-	line, cursor   int
-	wrong, correct int
+	textStructure []int
+
+	line, cursor int
+	CurrentText  quotes.CurrentText
 }
 
+// Possible text character statuses
 const (
 	CELL_WRONG = 0
 	CELL_RIGHT = 1
 	CELL_BLANK = 2
 )
 
-func NewWpmBox(x int, y int, w int, h int, text []rune) *WpmBox {
-	box := &WpmBox{x: x, y: y, w: w, h: h, text: text}
+// WpmBox constructor
+func NewWpmBox(x int, y int, w int, h int, text string) *WpmBox {
+	box := &WpmBox{x: x, y: y, w: w, h: h}
 	box.SetText(text)
 	return box
 }
 
-func (w *WpmBox) SetText(text []rune) {
-	w.buffer = [][]termbox.Cell{}
-	lines := strings.Split(string(w.text), "\n")
-	lastLine := len(lines) - 1
+// Set wpmbox text, update internal buffer
+func (w *WpmBox) SetText(text string) {
+	// Reset cursor position
+	w.cursor = 0
+	w.line = 0
 
-	for curLine, str := range lines {
-		cells := make([]termbox.Cell, len(str))
+	w.CurrentText = quotes.CurrentText{Text: text}
 
-		for i, char := range str {
-			if char == ' ' {
-				char = '·'
-			}
-			cells[i] = termbox.Cell{Ch: char, Fg: termbox.ColorDefault, Bg: termbox.ColorDefault}
+	lines := strings.Split(text, "\n")
+	w.textStructure = make([]int, len(lines))
+
+	for i, line := range lines {
+		w.textStructure[i] = len(line)
+
+		// new line character to all lines except last one
+		if i != len(lines)-1 {
+			w.textStructure[i] += 1
 		}
-
-		if lastLine != curLine {
-			cells = append(cells, termbox.Cell{Ch: '↩', Fg: termbox.ColorDefault, Bg: termbox.ColorDefault})
-		}
-		w.buffer = append(w.buffer, cells)
 	}
 }
 
+func (w *WpmBox) RuneAt(position int) rune {
+	char := w.CurrentText.RuneAt(position)
+	switch char {
+	case ' ':
+		return '·'
+	case '\n':
+		return '↩'
+	default:
+		return char
+	}
+}
+
+// Color of text character at given position
 func (w *WpmBox) cellColor(currentChar int) (termbox.Attribute, termbox.Attribute) {
-	switch w.CellType(currentChar) {
-	case CELL_RIGHT:
+
+	switch w.CurrentText.CharStatus(currentChar) {
+	case quotes.RIGHT:
 		return termbox.ColorGreen, termbox.ColorDefault
-	case CELL_WRONG:
-		return termbox.ColorMagenta, termbox.ColorDefault
+	case quotes.WRONG:
+		return termbox.ColorDefault, termbox.ColorRed
 	default:
 		return termbox.ColorDefault, termbox.ColorDefault
-	}
-}
-
-func (w *WpmBox) CellType(currentChar int) int {
-	switch {
-	case currentChar < w.correct:
-		return CELL_RIGHT
-	case currentChar >= w.correct && currentChar < w.correct+w.wrong:
-		return CELL_WRONG
-	default:
-		return CELL_BLANK
 	}
 }
 
@@ -76,11 +81,13 @@ func (w *WpmBox) Draw() {
 
 	// Draw box content
 	currentChar := 0
-	for y, row := range w.buffer {
-		for x, cell := range row {
+	for y, chars := range w.textStructure {
+		for x := 0; x < chars; x++ {
 			// Determine color based on correctness
-			colFg, colBg := w.cellColor(currentChar)
-			termbox.SetCell(w.x+x, w.y+y, cell.Ch, colFg, colBg)
+			fg, bg := w.cellColor(currentChar)
+			char := w.RuneAt(currentChar)
+
+			termbox.SetCell(w.x+x, w.y+y, char, fg, bg)
 			currentChar++
 		}
 	}
@@ -90,40 +97,21 @@ func (w *WpmBox) Draw() {
 }
 
 func (w *WpmBox) InsKey(key rune) {
-	if w.TextEnded() {
+	if w.CurrentText.IsEndPosition() {
 		return
 	}
 
 	w.incCursor()
-
-	if w.CurrentRune() != key || w.wrong >= 1 {
-		w.wrong += 1
-	} else {
-		w.correct += 1
-	}
+	w.CurrentText.InsKey(key)
 }
 
 func (w *WpmBox) Backspace() {
-	if w.wrong > 0 {
-		w.wrong -= 1
-	} else if w.correct > 0 {
-		w.correct -= 1
-	}
+	w.CurrentText.Backspace()
 	w.decCursor()
 }
 
-func (w *WpmBox) TextEnded() bool {
-	idx := w.correct + w.wrong
-	return idx == len(w.text)
-}
-
-func (w *WpmBox) CurrentRune() rune {
-	idx := w.correct + w.wrong
-	return w.text[idx]
-}
-
 func (w *WpmBox) incCursor() {
-	if w.CurrentRune() == '\n' {
+	if w.CurrentText.CurrentRune() == '\n' {
 		w.line++
 		w.cursor = 0
 	} else {
@@ -136,6 +124,6 @@ func (w *WpmBox) decCursor() {
 		w.cursor--
 	} else if w.line > 0 {
 		w.line--
-		w.cursor = len(w.buffer[w.line]) - 1
+		w.cursor = w.textStructure[w.line] - 1
 	}
 }

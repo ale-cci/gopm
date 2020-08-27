@@ -15,7 +15,7 @@ type App struct {
 
 func (app *App) Build(maxX int, maxY int) []tui.Widget {
 	text := app.qi.Current().Text
-	app.box = tui.NewWpmBox(1, 1, maxX-2, maxY-2, []rune(text))
+	app.box = tui.NewWpmBox(1, 1, maxX-2, maxY-2, text)
 
 	return []tui.Widget{app.box}
 }
@@ -40,6 +40,11 @@ func (app *App) OnEvent(ev termbox.Event) bool {
 		}
 	case termbox.EventError:
 		panic(ev.Err)
+	}
+
+	if app.box.CurrentText.IsEndPosition() {
+		app.qi.Next()
+		app.box.SetText(app.qi.Current().Text)
 	}
 	return false
 }
