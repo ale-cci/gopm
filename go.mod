@@ -1,4 +1,4 @@
-module github.com/ale-cci/wpm2
+module github.com/ale-cci/gopm
 
 go 1.15
 

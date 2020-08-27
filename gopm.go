@@ -4,8 +4,8 @@ import (
 	"github.com/nsf/termbox-go"
 	"os"
 
-	"github.com/ale-cci/wpm2/quotes"
-	"github.com/ale-cci/wpm2/tui"
+	"github.com/ale-cci/gopm/quotes"
+	"github.com/ale-cci/gopm/tui"
 )
 
 type App struct {
