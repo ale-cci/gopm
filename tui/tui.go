@@ -39,7 +39,7 @@ func Run(app TUIApp) error {
 		}
 	}()
 
-	drawTick := time.NewTicker(30 * time.Millisecond)
+	drawTick := time.NewTicker(time.Second / 30)
 
 mainLoop:
 	for {
