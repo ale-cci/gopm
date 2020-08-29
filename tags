@@ -1,0 +1,115 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	0.0.0	/a3c87ab5/
+App	gopm.go	/^type App struct {$/;"	s	package:main
+Author	quotes/quotes.go	/^	Author string$/;"	m	struct:quotes.PlainText	typeref:typename:string
+BLANK	quotes/charstatus.go	/^	BLANK CharStatus = iota$/;"	c	package:quotes	typeref:type:CharStatus
+Backspace	quotes/keystrokecounter.go	/^func (t *KeystrokeCounter) Backspace() {$/;"	f	struct:quotes.KeystrokeCounter
+Backspace	tui/wpmbox.go	/^func (w *WpmBox) Backspace() {$/;"	f	struct:tui.WpmBox
+Bg	tui/utils.go	/^	Bg termbox.Attribute$/;"	m	struct:tui.CellColor	typeref:typename:termbox.Attribute
+Build	gopm.go	/^func (app *App) Build(maxX int, maxY int) []tui.Widget {$/;"	f	struct:main.App	typeref:typename:[]tui.Widget
+Build	tui/tui.go	/^	Build(maxX int, maxY int) []Widget$/;"	n	interface:tui.TUIApp	typeref:typename:[]Widget
+CellColor	tui/utils.go	/^type CellColor struct {$/;"	s	package:tui
+CharStatus	quotes/charstatus.go	/^type CharStatus int$/;"	t	package:quotes	typeref:typename:int
+CharStatus	quotes/keystrokecounter.go	/^func (t *KeystrokeCounter) CharStatus(position int) CharStatus {$/;"	f	struct:quotes.KeystrokeCounter	typeref:typename:CharStatus
+ChunkedFile	chunk/chunkedfile.go	/^type ChunkedFile struct {$/;"	s	package:chunk
+CircularIterator	chunk/chunkiterator.go	/^type CircularIterator interface {$/;"	i	package:chunk
+ColorMap	tui/config.go	/^func ColorMap() map[quotes.CharStatus]CellColor {$/;"	f	package:tui	typeref:typename:map[quotes.CharStatus]CellColor
+Current	chunk/chunkedfile.go	/^func (cf *ChunkedFile) Current() ([]rune, error) {$/;"	f	struct:chunk.ChunkedFile	typeref:typename:([]rune, error)
+Current	chunk/chunkiterator.go	/^	Current() []rune$/;"	n	interface:chunk.CircularIterator	typeref:typename:[]rune
+Current	quotes/fileiterator.go	/^func (qi *FileIterator) Current() PlainText {$/;"	f	struct:quotes.FileIterator	typeref:typename:PlainText
+CurrentRune	quotes/keystrokecounter.go	/^func (t *KeystrokeCounter) CurrentRune() rune {$/;"	f	struct:quotes.KeystrokeCounter	typeref:typename:rune
+Draw	tui/utils.go	/^	Draw()$/;"	n	interface:tui.Widget
+Draw	tui/wpmbox.go	/^func (w *WpmBox) Draw() {$/;"	f	struct:tui.WpmBox
+DrawBox	tui/utils.go	/^func DrawBox(x, y, w, h int) {$/;"	f	package:tui
+Fg	tui/utils.go	/^	Fg termbox.Attribute$/;"	m	struct:tui.CellColor	typeref:typename:termbox.Attribute
+File	chunk/chunkedfile.go	/^	File         io.ReadSeeker$/;"	m	struct:chunk.ChunkedFile	typeref:typename:io.ReadSeeker
+FileIterator	quotes/fileiterator.go	/^type FileIterator struct {$/;"	s	package:quotes
+InsKey	quotes/keystrokecounter.go	/^func (t *KeystrokeCounter) InsKey(char rune) {$/;"	f	struct:quotes.KeystrokeCounter
+InsKey	tui/wpmbox.go	/^func (w *WpmBox) InsKey(key rune) {$/;"	f	struct:tui.WpmBox
+IsEndPosition	quotes/keystrokecounter.go	/^func (t *KeystrokeCounter) IsEndPosition() bool {$/;"	f	struct:quotes.KeystrokeCounter	typeref:typename:bool
+IsStartPosition	quotes/keystrokecounter.go	/^func (t *KeystrokeCounter) IsStartPosition() bool {$/;"	f	struct:quotes.KeystrokeCounter	typeref:typename:bool
+KeystrokeCounter	quotes/keystrokecounter.go	/^type KeystrokeCounter struct {$/;"	s	package:quotes
+KeystrokeCounter	tui/wpmbox.go	/^	KeystrokeCounter quotes.KeystrokeCounter$/;"	m	struct:tui.WpmBox	typeref:typename:quotes.KeystrokeCounter
+Lines	chunk/chunkedfile.go	/^	Lines        int$/;"	m	struct:chunk.ChunkedFile	typeref:typename:int
+LoadFile	quotes/quotes.go	/^func LoadFile(file io.Reader) (*PlainText, error) {$/;"	f	package:quotes	typeref:typename:(*PlainText, error)
+NewApp	gopm.go	/^func NewApp(qi *quotes.FileIterator) *App {$/;"	f	package:main	typeref:typename:*App
+NewFileIterator	quotes/fileiterator.go	/^func NewFileIterator(chunks []PlainText) *FileIterator {$/;"	f	package:quotes	typeref:typename:*FileIterator
+NewWpmBox	tui/wpmbox.go	/^func NewWpmBox(x int, y int, w int, h int, text string) *WpmBox {$/;"	f	package:tui	typeref:typename:*WpmBox
+Next	chunk/chunkedfile.go	/^func (cf *ChunkedFile) Next() {$/;"	f	struct:chunk.ChunkedFile
+Next	chunk/chunkiterator.go	/^	Next()$/;"	n	interface:chunk.CircularIterator
+Next	quotes/fileiterator.go	/^func (qi *FileIterator) Next() {$/;"	f	struct:quotes.FileIterator
+OnEvent	gopm.go	/^func (app *App) OnEvent(ev termbox.Event) bool {$/;"	f	struct:main.App	typeref:typename:bool
+OnEvent	tui/tui.go	/^	OnEvent(e termbox.Event) bool$/;"	n	interface:tui.TUIApp	typeref:typename:bool
+PlainText	quotes/quotes.go	/^type PlainText struct {$/;"	s	package:quotes
+Position	quotes/keystrokecounter.go	/^func (t *KeystrokeCounter) Position() int {$/;"	f	struct:quotes.KeystrokeCounter	typeref:typename:int
+Prev	chunk/chunkedfile.go	/^func (cf *ChunkedFile) Prev() {$/;"	f	struct:chunk.ChunkedFile
+Prev	chunk/chunkiterator.go	/^	Prev()$/;"	n	interface:chunk.CircularIterator
+Prev	quotes/fileiterator.go	/^func (qi *FileIterator) Prev() {$/;"	f	struct:quotes.FileIterator
+RIGHT	quotes/charstatus.go	/^	RIGHT CharStatus = iota$/;"	c	package:quotes	typeref:type:CharStatus
+Run	tui/tui.go	/^func Run(app TUIApp) error {$/;"	f	package:tui	typeref:typename:error
+RuneAt	quotes/keystrokecounter.go	/^func (t *KeystrokeCounter) RuneAt(position int) rune {$/;"	f	struct:quotes.KeystrokeCounter	typeref:typename:rune
+RuneMap	tui/config.go	/^func RuneMap() map[rune]rune {$/;"	f	package:tui	typeref:typename:map[rune]rune
+ScrollOff	tui/wpmbox.go	/^	ScrollOff int$/;"	m	struct:tui.WpmBox	typeref:typename:int
+SetText	tui/wpmbox.go	/^func (w *WpmBox) SetText(text string) {$/;"	f	struct:tui.WpmBox
+SpecialRuneSizes	tui/config.go	/^func SpecialRuneSizes() map[rune]int {$/;"	f	package:tui	typeref:typename:map[rune]int
+String	quotes/charstatus.go	/^func (c CharStatus) String() string {$/;"	f	type:quotes.CharStatus	typeref:typename:string
+TUIApp	tui/tui.go	/^type TUIApp interface {$/;"	i	package:tui
+TestChunkedFile	chunk/chunkedfile_test.go	/^func TestChunkedFile(t *testing.T) {$/;"	f	package:chunk_test
+TestCurrent	quotes/keystrokecounter_test.go	/^func TestCurrent(t *testing.T) {$/;"	f	package:quotes
+TestFileIterator	quotes/fileiterator_test.go	/^func TestFileIterator(t *testing.T) {$/;"	f	package:quotes_test
+TestWpmBox	tui/wpmbox_test.go	/^func TestWpmBox(t *testing.T) {$/;"	f	package:tui
+Text	quotes/keystrokecounter.go	/^	Text  string$/;"	m	struct:quotes.KeystrokeCounter	typeref:typename:string
+Text	quotes/quotes.go	/^	Text   string$/;"	m	struct:quotes.PlainText	typeref:typename:string
+WRONG	quotes/charstatus.go	/^	WRONG CharStatus = iota$/;"	c	package:quotes	typeref:type:CharStatus
+Widget	tui/utils.go	/^type Widget interface {$/;"	i	package:tui
+WpmBox	tui/wpmbox.go	/^type WpmBox struct {$/;"	s	package:tui
+asStr	tui/wpmbox_test.go	/^func asStr(line []termbox.Cell) string {$/;"	f	package:tui	typeref:typename:string
+box	gopm.go	/^	box *tui.WpmBox$/;"	m	struct:main.App	typeref:typename:*tui.WpmBox
+cellColor	tui/wpmbox.go	/^func (w *WpmBox) cellColor(currentChar int) CellColor {$/;"	f	struct:tui.WpmBox	typeref:typename:CellColor
+chunk	chunk/chunkedfile.go	/^package chunk$/;"	p
+chunk	chunk/chunkiterator.go	/^package chunk$/;"	p
+chunk_test	chunk/chunkedfile_test.go	/^package chunk_test$/;"	p
+chunks	quotes/fileiterator.go	/^	chunks []PlainText$/;"	m	struct:quotes.FileIterator	typeref:typename:[]PlainText
+correct	quotes/keystrokecounter.go	/^	correct, wrong int$/;"	m	struct:quotes.KeystrokeCounter	typeref:typename:int
+currentChunk	chunk/chunkedfile.go	/^	currentChunk int64$/;"	m	struct:chunk.ChunkedFile	typeref:typename:int64
+cursor	tui/wpmbox.go	/^	line, cursor     int$/;"	m	struct:tui.WpmBox	typeref:typename:int
+decCursor	tui/wpmbox.go	/^func (w *WpmBox) decCursor() {$/;"	f	struct:tui.WpmBox
+drawWidgets	tui/tui.go	/^func drawWidgets(widgets []Widget) {$/;"	f	package:tui
+f	chunk/chunkedfile_test.go	/^	f "github.com\/mattetti\/filebuffer"$/;"	P	package:github.com/mattetti/filebuffer
+fill	tui/utils.go	/^func fill(x, y, w, h int, cell termbox.Cell) {$/;"	f	package:tui
+h	tui/wpmbox.go	/^	w, h int$/;"	m	struct:tui.WpmBox	typeref:typename:int
+incCursor	tui/wpmbox.go	/^func (w *WpmBox) incCursor() {$/;"	f	struct:tui.WpmBox
+index	chunk/chunkedfile.go	/^	index        int$/;"	m	struct:chunk.ChunkedFile	typeref:typename:int
+index	quotes/fileiterator.go	/^	index  int$/;"	m	struct:quotes.FileIterator	typeref:typename:int
+line	tui/wpmbox.go	/^	line, cursor     int$/;"	m	struct:tui.WpmBox	typeref:typename:int
+main	gopm.go	/^func main() {$/;"	f	package:main
+main	gopm.go	/^package main$/;"	p
+min	tui/utils.go	/^func min(a, b int) int {$/;"	f	package:tui	typeref:typename:int
+normalizeIndex	quotes/fileiterator.go	/^func (qi *FileIterator) normalizeIndex() {$/;"	f	struct:quotes.FileIterator
+offset	tui/wpmbox.go	/^	offset int$/;"	m	struct:tui.WpmBox	typeref:typename:int
+parseRune	tui/wpmbox.go	/^func parseRune(char rune) rune {$/;"	f	package:tui	typeref:typename:rune
+qi	gopm.go	/^	qi  *quotes.FileIterator$/;"	m	struct:main.App	typeref:typename:*quotes.FileIterator
+quote	quotes/keystrokecounter.go	/^	quote *PlainText$/;"	m	struct:quotes.KeystrokeCounter	typeref:typename:*PlainText
+quotes	quotes/charstatus.go	/^package quotes$/;"	p
+quotes	quotes/fileiterator.go	/^package quotes$/;"	p
+quotes	quotes/keystrokecounter.go	/^package quotes$/;"	p
+quotes	quotes/keystrokecounter_test.go	/^package quotes$/;"	p
+quotes	quotes/quotes.go	/^package quotes$/;"	p
+quotes_test	quotes/fileiterator_test.go	/^package quotes_test$/;"	p
+runeSize	tui/wpmbox.go	/^func runeSize(char rune) int {$/;"	f	package:tui	typeref:typename:int
+textStructure	tui/wpmbox.go	/^	textStructure []int$/;"	m	struct:tui.WpmBox	typeref:typename:[]int
+tui	tui/config.go	/^package tui$/;"	p
+tui	tui/tui.go	/^package tui$/;"	p
+tui	tui/utils.go	/^package tui$/;"	p
+tui	tui/wpmbox.go	/^package tui$/;"	p
+tui	tui/wpmbox_test.go	/^package tui$/;"	p
+w	tui/wpmbox.go	/^	w, h int$/;"	m	struct:tui.WpmBox	typeref:typename:int
+wrong	quotes/keystrokecounter.go	/^	correct, wrong int$/;"	m	struct:quotes.KeystrokeCounter	typeref:typename:int
+x	tui/wpmbox.go	/^	x, y int$/;"	m	struct:tui.WpmBox	typeref:typename:int
+y	tui/wpmbox.go	/^	x, y int$/;"	m	struct:tui.WpmBox	typeref:typename:int

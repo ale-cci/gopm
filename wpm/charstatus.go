@@ -1,4 +1,4 @@
-package quotes
+package wpm
 
 // possible cell status
 type CharStatus int

@@ -1,49 +1,39 @@
 package chunk
 
-import (
-	"bufio"
-	"io"
-	"strings"
-)
-
-type CircularItarator interface {
-	Next()
-	Prev()
-	Current() []rune
-}
-
 type ChunkIterator struct {
-	Files []io.ReadSeeker
-	Lines int
-
-	// Index representing current file
-	index int
+	Files    []Iterator
+	currFile int
 }
 
-func (c *ChunkIterator) Next() {
+func (ci *ChunkIterator) getCurrentFile() Iterator {
+	ci.currFile = ci.currFile % len(ci.Files)
 
-}
-
-func (c *ChunkIterator) Prev() {
-}
-
-func (c *ChunkIterator) Current() ([]rune, error) {
-	file := c.Files[c.index]
-
-	buffer := ""
-	reader := bufio.NewReader(file)
-
-	for i := 0; i < c.Lines; i++ {
-		line, err := reader.ReadString('\n')
-
-		if err != nil && err != io.EOF {
-			return nil, err
-		}
-
-		buffer += string(line)
+	if ci.currFile < 0 {
+		ci.currFile += len(ci.Files)
 	}
 
-	// Remove trailing zeroes
-	buffer = strings.TrimRight(buffer, "\n")
-	return []rune(buffer), nil
+	return ci.Files[ci.currFile]
+}
+
+func (ci *ChunkIterator) Current() string {
+
+	file := ci.getCurrentFile()
+	return file.Current()
+}
+
+func (ci *ChunkIterator) Next() bool {
+	file := ci.getCurrentFile()
+	if file.Next() {
+		ci.currFile++
+	}
+	return false
+}
+
+func (ci *ChunkIterator) Prev() bool {
+	file := ci.getCurrentFile()
+
+	if file.Prev() {
+		ci.currFile -= 1
+	}
+	return false
 }

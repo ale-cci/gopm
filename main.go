@@ -3,20 +3,21 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/nsf/termbox-go"
 	"os"
 
-	"github.com/ale-cci/gopm/quotes"
+	"github.com/nsf/termbox-go"
+
+	"github.com/ale-cci/gopm/chunk"
 	"github.com/ale-cci/gopm/tui"
 )
 
 type App struct {
-	qi  *quotes.FileIterator
 	box *tui.WpmBox
+	ci  *chunk.ChunkIterator
 }
 
 func (app *App) Build(maxX int, maxY int) []tui.Widget {
-	text := app.qi.Current().Text
+	text := app.ci.Current()
 	app.box = tui.NewWpmBox(1, 1, maxX-2, maxY-2, text)
 	app.box.ScrollOff = 4
 
@@ -48,25 +49,27 @@ func (app *App) OnEvent(ev termbox.Event) bool {
 	}
 
 	if app.box.KeystrokeCounter.IsEndPosition() {
-		app.qi.Next()
-		app.box.SetText(app.qi.Current().Text)
+		app.ci.Next()
+		app.box.SetText(app.ci.Current())
 	}
 	return false
 }
 
-func NewApp(qi *quotes.FileIterator) *App {
-	return &App{qi: qi}
+func NewApp(ci *chunk.ChunkIterator) *App {
+	return &App{ci: ci}
 }
 
 func main() {
 	flag.Parse()
-	files := flag.Args()
-	if len(files) == 0 {
-		panic("No files provided")
+	filenames := flag.Args()
+	if len(filenames) == 0 {
+		fmt.Println("No filename provided")
+		return
 	}
 
-	quoteList := make([]quotes.PlainText, len(files))
-	for i, filename := range files {
+	chunkedFiles := make([]chunk.Iterator, len(filenames))
+
+	for i, filename := range filenames {
 		if _, err := os.Stat(filename); os.IsNotExist(err) {
 			fmt.Printf("Unable to open file %q\n", filename)
 			os.Exit(1)
@@ -77,15 +80,12 @@ func main() {
 		}
 		defer file.Close()
 
-		quote, err := quotes.LoadFile(file)
-		quoteList[i] = *quote
-		if err != nil {
-			panic(err)
-		}
+		chunkedFiles[i] = chunk.NewChunkedFile(file, 40)
 	}
 
-	qi := quotes.NewFileIterator(quoteList)
-	app := NewApp(qi)
+	ci := &chunk.ChunkIterator{Files: chunkedFiles}
+	app := NewApp(ci)
 
 	tui.Run(app)
+	return
 }

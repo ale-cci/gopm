@@ -1,7 +1,7 @@
 package tui
 
 import (
-	"github.com/ale-cci/gopm/quotes"
+	"github.com/ale-cci/gopm/wpm"
 	"github.com/nsf/termbox-go"
 )
 
@@ -13,11 +13,11 @@ func RuneMap() map[rune]rune {
 	}
 }
 
-func ColorMap() map[quotes.CharStatus]CellColor {
-	return map[quotes.CharStatus]CellColor{
-		quotes.RIGHT: {Fg: termbox.ColorGreen, Bg: termbox.ColorDefault},
-		quotes.WRONG: {Fg: termbox.ColorDefault, Bg: termbox.ColorRed},
-		quotes.BLANK: {Fg: termbox.ColorDefault, Bg: termbox.ColorDefault},
+func ColorMap() map[wpm.CharStatus]CellColor {
+	return map[wpm.CharStatus]CellColor{
+		wpm.RIGHT: {Fg: termbox.ColorGreen, Bg: termbox.ColorDefault},
+		wpm.WRONG: {Fg: termbox.ColorDefault, Bg: termbox.ColorRed},
+		wpm.BLANK: {Fg: termbox.ColorDefault, Bg: termbox.ColorDefault},
 	}
 }
 

@@ -1,8 +1,7 @@
-package quotes
+package wpm
 
 type KeystrokeCounter struct {
-	Text  string
-	quote *PlainText
+	Text string
 	// Correct and wrong characters typed
 	correct, wrong int
 }

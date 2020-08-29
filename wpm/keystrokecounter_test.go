@@ -1,4 +1,4 @@
-package quotes
+package wpm
 
 import "testing"
 

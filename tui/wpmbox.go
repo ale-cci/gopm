@@ -3,7 +3,7 @@ package tui
 import (
 	"strings"
 
-	"github.com/ale-cci/gopm/quotes"
+	"github.com/ale-cci/gopm/wpm"
 	"github.com/nsf/termbox-go"
 )
 
@@ -17,7 +17,7 @@ type WpmBox struct {
 
 	// current line and position of cursor on the screen
 	line, cursor     int
-	KeystrokeCounter quotes.KeystrokeCounter
+	KeystrokeCounter wpm.KeystrokeCounter
 
 	// When number of line from margin where screen scrolling should start
 	ScrollOff int
@@ -40,7 +40,7 @@ func (w *WpmBox) SetText(text string) {
 	w.line = 0
 	w.offset = 0
 
-	w.KeystrokeCounter = quotes.KeystrokeCounter{Text: text}
+	w.KeystrokeCounter = wpm.KeystrokeCounter{Text: text}
 
 	lines := strings.Split(text, "\n")
 	w.textStructure = make([]int, len(lines))
