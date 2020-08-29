@@ -1,9 +1,12 @@
 package wpm
 
+import "time"
+
 type KeystrokeCounter struct {
 	Text string
 	// Correct and wrong characters typed
 	correct, wrong int
+	Start          time.Time
 }
 
 func (t *KeystrokeCounter) CurrentRune() rune {
@@ -15,6 +18,10 @@ func (t *KeystrokeCounter) RuneAt(position int) rune {
 }
 
 func (t *KeystrokeCounter) InsKey(char rune) {
+	if t.IsStartPosition() {
+		t.Start = time.Now()
+	}
+
 	if !t.IsEndPosition() {
 		current := t.CurrentRune()
 
@@ -24,6 +31,21 @@ func (t *KeystrokeCounter) InsKey(char rune) {
 			t.wrong += 1
 		}
 	}
+}
+
+func (t *KeystrokeCounter) Cpm(now time.Time) float64 {
+	elapsed := now.Sub(t.Start)
+	typed := t.correct
+	time := elapsed.Minutes()
+
+	if time < 0.00001 {
+		return 0
+	}
+	return float64(typed) / time
+}
+
+func (t *KeystrokeCounter) Wpm(now time.Time) float64 {
+	return t.Cpm(now) / 5
 }
 
 // Remove the last character inserted

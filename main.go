@@ -18,10 +18,13 @@ type App struct {
 
 func (app *App) Build(maxX int, maxY int) []tui.Widget {
 	text := app.ci.Current()
-	app.box = tui.NewWpmBox(1, 1, maxX-2, maxY-2, text)
+	app.box = tui.NewWpmBox(1, 3, maxX-2, maxY-4, text)
 	app.box.ScrollOff = 4
 
-	return []tui.Widget{app.box}
+	return []tui.Widget{
+		tui.NewWpmBar(1, 1, maxX-2, 1, &app.box.KeystrokeCounter),
+		app.box,
+	}
 }
 
 func (app *App) OnEvent(ev termbox.Event) bool {

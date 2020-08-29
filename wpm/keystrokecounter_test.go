@@ -1,6 +1,10 @@
 package wpm
 
-import "testing"
+import (
+	"math"
+	"testing"
+	"time"
+)
 
 func TestCurrent(t *testing.T) {
 	t.Run("Should correctly initialize ", func(t *testing.T) {
@@ -202,5 +206,61 @@ func TestCurrent(t *testing.T) {
 				t.Errorf("Wrong number of correct characters: %d expected: %d", got, expected)
 			}
 		})
+	})
+
+	t.Run("Wpm", func(t *testing.T) {
+		tt := []struct {
+			name     string
+			duration string
+			text     string
+			typed    []rune
+			expect   float64
+		}{
+			{
+				name:     "60cpm",
+				duration: "1s",
+				text:     "test",
+				typed:    []rune("t"),
+				expect:   60,
+			},
+			{
+				name:     "1cpm",
+				duration: "1m",
+				text:     "a",
+				typed:    []rune("abcdefgehij"),
+				expect:   1,
+			},
+			{
+				name:     "Start wpm",
+				duration: "0s",
+				text:     "test",
+				typed:    []rune("test"),
+				expect:   0,
+			},
+		}
+
+		for _, tc := range tt {
+			t.Run(tc.name, func(t *testing.T) {
+				start := time.Time{}
+				duration, err := time.ParseDuration(tc.duration)
+
+				if err != nil {
+					t.Fatalf("Failed to parse duration: %v", err)
+				}
+				end := start.Add(duration)
+
+				counter := KeystrokeCounter{Text: tc.text, Start: start}
+				for _, k := range tc.typed {
+					counter.InsKey(k)
+				}
+
+				got := counter.Cpm(end)
+				expect := tc.expect
+
+				if math.Abs(got-expect) >= 0.001 {
+					t.Fatalf("Wrong cpm calculation for %s: %v expected %v", tc.name, got, expect)
+				}
+			})
+		}
 	})
 }
