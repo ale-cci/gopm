@@ -1,6 +1,8 @@
 package tui
 
 import (
+	"time"
+
 	"github.com/nsf/termbox-go"
 )
 
@@ -29,14 +31,29 @@ func Run(app TUIApp) error {
 	drawWidgets(widgets)
 	termbox.Flush()
 
-	for {
-		if app.OnEvent(termbox.PollEvent()) {
-			break
-		}
+	eventQueue := make(chan termbox.Event)
 
-		termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-		drawWidgets(widgets)
-		termbox.Flush()
+	go func() {
+		for {
+			eventQueue <- termbox.PollEvent()
+		}
+	}()
+
+	drawTick := time.NewTicker(30 * time.Millisecond)
+
+mainLoop:
+	for {
+
+		select {
+		case ev := <-eventQueue:
+			if app.OnEvent(ev) {
+				break mainLoop
+			}
+		case <-drawTick.C:
+			termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+			drawWidgets(widgets)
+			termbox.Flush()
+		}
 	}
 
 	return nil
