@@ -1,15 +1,15 @@
 package quotes
 
 // possible cell status
-type CellState int
+type CharStatus int
 
 const (
-	WRONG CellState = iota
-	RIGHT CellState = iota
-	BLANK CellState = iota
+	WRONG CharStatus = iota
+	RIGHT CharStatus = iota
+	BLANK CharStatus = iota
 )
 
-func (c CellState) String() string {
+func (c CharStatus) String() string {
 	switch c {
 	case WRONG:
 		return "WRONG"

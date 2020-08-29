@@ -7,13 +7,6 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 type WpmBox struct {
 	// Box coordintates
 	x, y int
@@ -23,8 +16,8 @@ type WpmBox struct {
 	textStructure []int
 
 	// current line and position of cursor on the screen
-	line, cursor int
-	CurrentText  quotes.CurrentText
+	line, cursor     int
+	KeystrokeCounter quotes.KeystrokeCounter
 
 	// When number of line from margin where screen scrolling should start
 	ScrollOff int
@@ -32,13 +25,6 @@ type WpmBox struct {
 	// Number of lines hidden above
 	offset int
 }
-
-// Possible text character statuses
-const (
-	CELL_WRONG = 0
-	CELL_RIGHT = 1
-	CELL_BLANK = 2
-)
 
 // WpmBox constructor
 func NewWpmBox(x int, y int, w int, h int, text string) *WpmBox {
@@ -54,7 +40,7 @@ func (w *WpmBox) SetText(text string) {
 	w.line = 0
 	w.offset = 0
 
-	w.CurrentText = quotes.CurrentText{Text: text}
+	w.KeystrokeCounter = quotes.KeystrokeCounter{Text: text}
 
 	lines := strings.Split(text, "\n")
 	w.textStructure = make([]int, len(lines))
@@ -73,40 +59,33 @@ func (w *WpmBox) SetText(text string) {
 }
 
 func runeSize(char rune) int {
-	if char == '\t' {
-		return 4
+	val, ok := SpecialRuneSizes()[char]
+	if ok {
+		return val
 	}
 	return 1
 }
 
-func parseRune(char rune) rune {
-	switch char {
-	case ' ':
-		return '·'
-	case '\n':
-		return '↩'
-	case '\t':
-		return '⇥'
-	default:
-		return char
+func (w *WpmBox) cellColor(currentChar int) CellColor {
+	val, ok := ColorMap()[w.KeystrokeCounter.CharStatus(currentChar)]
+
+	if !ok {
+		panic("Invalid cell state")
 	}
+	return val
 }
 
-// Color of text character at given position
-func (w *WpmBox) cellColor(currentChar int) (termbox.Attribute, termbox.Attribute) {
+func parseRune(char rune) rune {
+	val, ok := RuneMap()[char]
 
-	switch w.CurrentText.CharStatus(currentChar) {
-	case quotes.RIGHT:
-		return termbox.ColorGreen, termbox.ColorDefault
-	case quotes.WRONG:
-		return termbox.ColorDefault, termbox.ColorRed
-	default:
-		return termbox.ColorDefault, termbox.ColorDefault
+	if ok {
+		return val
 	}
+	return char
 }
 
 func (w *WpmBox) Draw() {
-	DrawBox(w.x, w.y, w.w, w.h)
+	// DrawBox(w.x, w.y, w.w, w.h)
 
 	currentChar := 0
 	for l := 0; l < w.offset; l++ {
@@ -116,12 +95,12 @@ func (w *WpmBox) Draw() {
 	// Draw box content
 	for y := 0; y < min(w.h, len(w.textStructure)-w.offset); y++ {
 		for x := 0; x < w.textStructure[w.offset+y]; {
-			fg, bg := w.cellColor(currentChar)
+			color := w.cellColor(currentChar)
 
-			currChar := w.CurrentText.RuneAt(currentChar)
+			currChar := w.KeystrokeCounter.RuneAt(currentChar)
 			parsedChar := parseRune(currChar)
 
-			termbox.SetCell(w.x+x, w.y+y, parsedChar, fg, bg)
+			termbox.SetCell(w.x+x, w.y+y, parsedChar, color.Fg, color.Bg)
 			currentChar++
 
 			size := runeSize(currChar)
@@ -134,21 +113,21 @@ func (w *WpmBox) Draw() {
 }
 
 func (w *WpmBox) InsKey(key rune) {
-	if w.CurrentText.IsEndPosition() {
+	if w.KeystrokeCounter.IsEndPosition() {
 		return
 	}
 
 	w.incCursor()
-	w.CurrentText.InsKey(key)
+	w.KeystrokeCounter.InsKey(key)
 }
 
 func (w *WpmBox) Backspace() {
-	w.CurrentText.Backspace()
+	w.KeystrokeCounter.Backspace()
 	w.decCursor()
 }
 
 func (w *WpmBox) incCursor() {
-	if w.CurrentText.CurrentRune() == '\n' {
+	if w.KeystrokeCounter.CurrentRune() == '\n' {
 		if w.h-w.line > w.ScrollOff {
 			w.line++
 		} else if w.line+w.offset+w.ScrollOff < len(w.textStructure)-1 {
@@ -159,12 +138,12 @@ func (w *WpmBox) incCursor() {
 
 		w.cursor = 0
 	} else {
-		w.cursor += runeSize(w.CurrentText.CurrentRune())
+		w.cursor += runeSize(w.KeystrokeCounter.CurrentRune())
 	}
 }
 
 func (w *WpmBox) decCursor() {
-	c := w.CurrentText.CurrentRune()
+	c := w.KeystrokeCounter.CurrentRune()
 	if w.cursor > 0 {
 		w.cursor -= runeSize(c)
 	} else if w.line > 0 {

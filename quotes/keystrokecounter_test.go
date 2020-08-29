@@ -4,15 +4,15 @@ import "testing"
 
 func TestCurrent(t *testing.T) {
 	t.Run("Should correctly initialize ", func(t *testing.T) {
-		currentText := CurrentText{Text: "Test", Author: "Myself"}
+		currentText := KeystrokeCounter{Text: "Test"}
 
 		if currentText.correct != 0 || currentText.wrong != 0 {
-			t.Errorf("Wrong CurrentText initialize")
+			t.Errorf("Wrong KeystrokeCounter initialize")
 		}
 	})
 
 	t.Run("Untyped characters should be blank", func(t *testing.T) {
-		currentText := CurrentText{Text: "default"}
+		currentText := KeystrokeCounter{Text: "default"}
 
 		got := currentText.CharStatus(0)
 		expected := BLANK
@@ -23,7 +23,7 @@ func TestCurrent(t *testing.T) {
 	})
 
 	t.Run("Right cells should be right", func(t *testing.T) {
-		ct := CurrentText{Text: "test"}
+		ct := KeystrokeCounter{Text: "test"}
 		ct.correct = 2
 
 		got := ct.CharStatus(1)
@@ -35,7 +35,7 @@ func TestCurrent(t *testing.T) {
 	})
 
 	t.Run("Wrong cells should be wrong", func(t *testing.T) {
-		ct := CurrentText{Text: "test"}
+		ct := KeystrokeCounter{Text: "test"}
 		ct.wrong = 2
 
 		got := ct.CharStatus(1)
@@ -47,7 +47,7 @@ func TestCurrent(t *testing.T) {
 	})
 
 	t.Run("Test mixed cell status", func(t *testing.T) {
-		ct := CurrentText{Text: "RWB"}
+		ct := KeystrokeCounter{Text: "RWB"}
 		ct.correct = 1
 		ct.wrong = 1
 
@@ -75,7 +75,7 @@ func TestCurrent(t *testing.T) {
 
 	t.Run("InsKey", func(t *testing.T) {
 		t.Run("InsKey should identify correct key", func(t *testing.T) {
-			ct := CurrentText{Text: "Abcd"}
+			ct := KeystrokeCounter{Text: "Abcd"}
 			ct.InsKey('A')
 
 			got := ct.correct
@@ -87,7 +87,7 @@ func TestCurrent(t *testing.T) {
 		})
 
 		t.Run("Should insert detect correct key when inserted", func(t *testing.T) {
-			ct := CurrentText{Text: "Abcd"}
+			ct := KeystrokeCounter{Text: "Abcd"}
 			ct.InsKey('B')
 
 			got := ct.wrong
@@ -99,7 +99,7 @@ func TestCurrent(t *testing.T) {
 		})
 
 		t.Run("On error all next keystrokes should be error", func(t *testing.T) {
-			ct := CurrentText{Text: "Abcd"}
+			ct := KeystrokeCounter{Text: "Abcd"}
 			ct.InsKey('B')
 			ct.InsKey('b')
 			ct.InsKey('c')
@@ -113,7 +113,7 @@ func TestCurrent(t *testing.T) {
 		})
 
 		t.Run("Detect correct characters in succession", func(t *testing.T) {
-			ct := CurrentText{Text: "Test"}
+			ct := KeystrokeCounter{Text: "Test"}
 			ct.InsKey('T')
 			ct.InsKey('e')
 			ct.InsKey('s')
@@ -127,7 +127,7 @@ func TestCurrent(t *testing.T) {
 		})
 
 		t.Run("Should stop character insertion when string is finished", func(t *testing.T) {
-			ct := CurrentText{Text: "s"}
+			ct := KeystrokeCounter{Text: "s"}
 			ct.InsKey('s')
 			ct.InsKey('s')
 
@@ -142,7 +142,7 @@ func TestCurrent(t *testing.T) {
 
 	t.Run("Backspace", func(t *testing.T) {
 		t.Run("Should delete correct character inserted on backspace", func(t *testing.T) {
-			ct := CurrentText{Text: "s"}
+			ct := KeystrokeCounter{Text: "s"}
 			ct.InsKey('s')
 			ct.Backspace()
 
@@ -155,7 +155,7 @@ func TestCurrent(t *testing.T) {
 		})
 
 		t.Run("Should not delete characters at start of function", func(t *testing.T) {
-			ct := CurrentText{Text: "s"}
+			ct := KeystrokeCounter{Text: "s"}
 			ct.Backspace()
 
 			got := ct.correct
@@ -167,7 +167,7 @@ func TestCurrent(t *testing.T) {
 		})
 
 		t.Run("Should delete wrong characters", func(t *testing.T) {
-			ct := CurrentText{Text: "s"}
+			ct := KeystrokeCounter{Text: "s"}
 			ct.InsKey('a')
 			ct.Backspace()
 
@@ -180,7 +180,7 @@ func TestCurrent(t *testing.T) {
 		})
 
 		t.Run("Should delete wrong characters first", func(t *testing.T) {
-			ct := CurrentText{Text: "Test string"}
+			ct := KeystrokeCounter{Text: "Test string"}
 			ct.InsKey('T')
 			ct.InsKey('e')
 			ct.InsKey('s')

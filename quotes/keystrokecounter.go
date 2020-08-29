@@ -1,22 +1,21 @@
 package quotes
 
-type CurrentText struct {
-	Text   string
-	Author string
-
+type KeystrokeCounter struct {
+	Text  string
+	quote *PlainText
 	// Correct and wrong characters typed
 	correct, wrong int
 }
 
-func (t *CurrentText) CurrentRune() rune {
+func (t *KeystrokeCounter) CurrentRune() rune {
 	return t.RuneAt(t.Position())
 }
 
-func (t *CurrentText) RuneAt(position int) rune {
+func (t *KeystrokeCounter) RuneAt(position int) rune {
 	return []rune(t.Text)[position]
 }
 
-func (t *CurrentText) InsKey(char rune) {
+func (t *KeystrokeCounter) InsKey(char rune) {
 	if !t.IsEndPosition() {
 		current := t.CurrentRune()
 
@@ -28,7 +27,8 @@ func (t *CurrentText) InsKey(char rune) {
 	}
 }
 
-func (t *CurrentText) Backspace() {
+// Remove the last character inserted
+func (t *KeystrokeCounter) Backspace() {
 	if !t.IsStartPosition() {
 		if t.wrong > 0 {
 			t.wrong -= 1
@@ -38,7 +38,9 @@ func (t *CurrentText) Backspace() {
 	}
 }
 
-func (t *CurrentText) CharStatus(position int) CellState {
+// Return the status of the character at `position`
+// RIGHT, WRONG or BLANK if the character has not been typed yet
+func (t *KeystrokeCounter) CharStatus(position int) CharStatus {
 	switch {
 	case position < t.correct:
 		return RIGHT
@@ -49,14 +51,15 @@ func (t *CurrentText) CharStatus(position int) CellState {
 	}
 }
 
-func (t *CurrentText) Position() int {
+func (t *KeystrokeCounter) Position() int {
 	return t.correct + t.wrong
 }
 
-func (t *CurrentText) IsStartPosition() bool {
+func (t *KeystrokeCounter) IsStartPosition() bool {
 	return t.Position() == 0
 }
 
-func (t *CurrentText) IsEndPosition() bool {
+// Has reached the end of the text
+func (t *KeystrokeCounter) IsEndPosition() bool {
 	return t.Position() == len(t.Text)
 }

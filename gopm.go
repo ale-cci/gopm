@@ -11,7 +11,7 @@ import (
 )
 
 type App struct {
-	qi  *quotes.QuoteIterator
+	qi  *quotes.FileIterator
 	box *tui.WpmBox
 }
 
@@ -47,14 +47,14 @@ func (app *App) OnEvent(ev termbox.Event) bool {
 		panic(ev.Err)
 	}
 
-	if app.box.CurrentText.IsEndPosition() {
+	if app.box.KeystrokeCounter.IsEndPosition() {
 		app.qi.Next()
 		app.box.SetText(app.qi.Current().Text)
 	}
 	return false
 }
 
-func NewApp(qi *quotes.QuoteIterator) *App {
+func NewApp(qi *quotes.FileIterator) *App {
 	return &App{qi: qi}
 }
 
@@ -65,7 +65,7 @@ func main() {
 		panic("No files provided")
 	}
 
-	quoteList := make([]quotes.Quote, len(files))
+	quoteList := make([]quotes.PlainText, len(files))
 	for i, filename := range files {
 		if _, err := os.Stat(filename); os.IsNotExist(err) {
 			fmt.Printf("Unable to open file %q\n", filename)
@@ -84,7 +84,7 @@ func main() {
 		}
 	}
 
-	qi := quotes.NewQuoteIterator(quoteList)
+	qi := quotes.NewFileIterator(quoteList)
 	app := NewApp(qi)
 
 	tui.Run(app)

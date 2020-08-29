@@ -41,3 +41,15 @@ func DrawBox(x, y, w, h int) {
 type Widget interface {
 	Draw()
 }
+
+type CellColor struct {
+	Bg termbox.Attribute
+	Fg termbox.Attribute
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
