@@ -10,22 +10,42 @@ import (
 
 	"github.com/ale-cci/gopm/chunk"
 	"github.com/ale-cci/gopm/tui"
+	"github.com/ale-cci/gopm/wpm"
 )
 
 type App struct {
-	box           *tui.WpmBox
-	chunkIterator *chunk.ChunkIterator
+	box      *tui.WpmBox
+	iterator chunk.Iterator
+	counter  wpm.KeystrokeCounter
+	text     *tui.ParsedText
 }
 
 func (app *App) Build(maxX int, maxY int) []tui.Widget {
-	text := app.chunkIterator.Current()
-	app.box = tui.NewWpmBox(1, 3, maxX-2, maxY-4, text)
+	app.counter = wpm.KeystrokeCounter{}
+
+	text := app.iterator.Current()
+	app.setText(text)
+
+	app.box = tui.NewWpmBox(1, 3, maxX-2, maxY-4, app.text, &app.counter)
 	app.box.ScrollOff = 4
 
 	return []tui.Widget{
-		tui.NewWpmBar(1, 1, maxX-2, 1, &app.box.KeystrokeCounter),
+		tui.NewWpmBar(1, 1, maxX-2, 1, &app.counter),
 		app.box,
 	}
+}
+
+func (app *App) setText(text string) {
+	app.text = tui.NewParsedText(text)
+	app.box.SetText(&app.text)
+	app.counter.Capacity = len(text)
+	app.counter.Reset()
+}
+
+func (app *App) insKey(char rune) {
+	correct := app.text.RuneAt(app.counter.Position()) == char
+	app.counter.InsKey(correct)
+	app.box.IncCursor()
 }
 
 func (app *App) OnEvent(ev termbox.Event) bool {
@@ -35,44 +55,46 @@ func (app *App) OnEvent(ev termbox.Event) bool {
 		case termbox.KeyCtrlC:
 			return true
 		case termbox.KeySpace:
-			app.box.InsKey(' ')
+			app.insKey(' ')
+
 		case termbox.KeyEnter:
-			app.box.InsKey('\n')
+			app.insKey('\n')
 		case termbox.KeyTab:
-			app.box.InsKey('\t')
+			app.insKey('\t')
 
 		case termbox.KeyCtrlN:
-			app.chunkIterator.Next()
-			app.box.SetText(app.chunkIterator.Current())
+			app.iterator.Next()
+			app.setText(app.iterator.Current())
 
 		case termbox.KeyCtrlP:
-			app.chunkIterator.Prev()
-			app.box.SetText(app.chunkIterator.Current())
+			app.iterator.Prev()
+			app.setText(app.iterator.Current())
 
 		case termbox.KeyBackspace, termbox.KeyBackspace2:
-			app.box.Backspace()
+			app.counter.Backspace()
+			app.box.DecCursor()
 
 		default:
 			if ev.Ch != 0 {
-				if app.box.KeystrokeCounter.IsStartPosition() {
-					app.box.KeystrokeCounter.Start = time.Now()
+				if app.counter.IsStartPosition() {
+					app.counter.Start = time.Now()
 				}
-				app.box.InsKey(ev.Ch)
+				app.insKey(ev.Ch)
 			}
 		}
 	case termbox.EventError:
 		panic(ev.Err)
 	}
 
-	if app.box.KeystrokeCounter.IsEndPosition() {
-		app.chunkIterator.Next()
-		app.box.SetText(app.chunkIterator.Current())
+	if app.counter.IsEndPosition() {
+		app.iterator.Next()
+		app.setText(app.iterator.Current())
 	}
 	return false
 }
 
-func NewApp(chunkIterator *chunk.ChunkIterator) *App {
-	return &App{chunkIterator: chunkIterator}
+func NewApp(chunkIterator chunk.Iterator) *App {
+	return &App{iterator: chunkIterator}
 }
 
 func main() {

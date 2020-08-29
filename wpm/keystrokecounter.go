@@ -3,27 +3,17 @@ package wpm
 import "time"
 
 type KeystrokeCounter struct {
-	Text            string
 	Right, Wrong    int
 	Start           time.Time
 	TotalWrong      int
 	TotalKeystrokes int
+	Capacity        int
 }
 
-func (t *KeystrokeCounter) CurrentRune() rune {
-	return t.RuneAt(t.Position())
-}
-
-func (t *KeystrokeCounter) RuneAt(position int) rune {
-	return []rune(t.Text)[position]
-}
-
-func (t *KeystrokeCounter) InsKey(char rune) {
+func (t *KeystrokeCounter) InsKey(correct bool) {
 
 	if !t.IsEndPosition() {
-		current := t.CurrentRune()
-
-		if char == current && t.Wrong == 0 {
+		if correct && t.Wrong == 0 {
 			t.Right += 1
 		} else {
 			t.Wrong += 1
@@ -71,9 +61,8 @@ func (t *KeystrokeCounter) IsStartPosition() bool {
 	return t.Position() == 0
 }
 
-// Has reached the end of the text
 func (t *KeystrokeCounter) IsEndPosition() bool {
-	return t.Position() == len(t.Text)
+	return t.Position() == t.Capacity
 }
 
 // Return the status of the character at `position`
@@ -87,4 +76,11 @@ func (t *KeystrokeCounter) CharStatus(position int) CharStatus {
 	default:
 		return BLANK
 	}
+}
+
+func (t *KeystrokeCounter) Reset() {
+	t.Right = 0
+	t.Wrong = 0
+	t.TotalWrong = 0
+	t.TotalKeystrokes = 0
 }

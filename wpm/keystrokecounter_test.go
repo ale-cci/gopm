@@ -7,157 +7,160 @@ import (
 )
 
 func TestCurrent(t *testing.T) {
-	t.Run("Should Rightly initialize ", func(t *testing.T) {
-		currentText := KeystrokeCounter{Text: "Test"}
-
-		if currentText.Right != 0 || currentText.Wrong != 0 {
-			t.Errorf("Wrong KeystrokeCounter initialize")
-		}
-	})
-
-	t.Run("Untyped characters should be blank", func(t *testing.T) {
-		currentText := KeystrokeCounter{Text: "default"}
-
-		got := currentText.CharStatus(0)
-		expected := BLANK
-
-		if got != expected {
-			t.Errorf("Wrong character status for unvisited character: %v, expected %v", got, expected)
-		}
-	})
-
-	t.Run("Right cells should be right", func(t *testing.T) {
-		ct := KeystrokeCounter{Text: "test"}
-		ct.Right = 2
-
-		got := ct.CharStatus(1)
-		expected := RIGHT
-
-		if got != expected {
-			t.Errorf("Wrong character status for right character: %v, expected %v", got, expected)
-		}
-	})
-
-	t.Run("Wrong cells should be Wrong", func(t *testing.T) {
-		ct := KeystrokeCounter{Text: "test"}
-		ct.Wrong = 2
-
-		got := ct.CharStatus(1)
-		expected := WRONG
-
-		if got != expected {
-			t.Errorf("Wrong character status for Wrong character: %v, expected %v", got, expected)
-		}
-	})
-
-	t.Run("Test mixed cell status", func(t *testing.T) {
-		ct := KeystrokeCounter{Text: "RWB"}
-		ct.Right = 1
-		ct.Wrong = 1
-
-		got := ct.CharStatus(0)
-		expected := RIGHT
-
-		if got != expected {
-			t.Errorf("Wrong character status for character: %v, expected %v", got, expected)
+	t.Run("CharStatus", func(t *testing.T) {
+		tt := []struct {
+			name       string
+			keystrokes []bool
+			position   int
+			status     CharStatus
+		}{
+			{
+				name:       "untyped character",
+				keystrokes: []bool{},
+				position:   3,
+				status:     BLANK,
+			},
+			{
+				name:       "right character",
+				keystrokes: []bool{true},
+				position:   0,
+				status:     RIGHT,
+			},
+			{
+				name:       "wrong character",
+				keystrokes: []bool{false},
+				position:   0,
+				status:     WRONG,
+			},
+			{
+				name:       "wrong after right character",
+				keystrokes: []bool{true, false},
+				position:   1,
+				status:     WRONG,
+			},
+			{
+				name:       "right after wrong",
+				keystrokes: []bool{false, true},
+				position:   1,
+				status:     WRONG,
+			},
+			{
+				name:       "right before wrong",
+				keystrokes: []bool{true, false},
+				position:   0,
+				status:     RIGHT,
+			},
 		}
 
-		got = ct.CharStatus(1)
-		expected = WRONG
+		for _, tc := range tt {
+			t.Run(tc.name, func(t *testing.T) {
+				counter := KeystrokeCounter{Capacity: 8}
 
-		if got != expected {
-			t.Errorf("Wrong character status for character: %v, expected %v", got, expected)
-		}
+				for _, k := range tc.keystrokes {
+					counter.InsKey(k)
+				}
 
-		got = ct.CharStatus(2)
-		expected = BLANK
+				got := counter.CharStatus(tc.position)
+				expect := tc.status
 
-		if got != expected {
-			t.Errorf("Wrong character status for character: %v, expected %v", got, expected)
+				if got != expect {
+					t.Errorf("Unexpected status for %s: %s, expected: %s", tc.name, got, expect)
+				}
+			})
 		}
 	})
 
 	t.Run("InsKey and Backspace", func(t *testing.T) {
+		type Action int
+		const (
+			A_RIGHT     Action = iota
+			A_WRONG     Action = iota
+			A_BACKSPACE Action = iota
+		)
+
 		tt := []struct {
 			name       string
-			text       string
-			keystrokes []rune
+			keystrokes []Action
 			wrong      int
 			right      int
 			totalWrong int
+			capacity   int
 		}{
 			{
 				name:       "Should stop character insertion when string is finished",
-				text:       "s",
-				keystrokes: []rune("ss"),
+				keystrokes: []Action{A_RIGHT, A_WRONG},
 				wrong:      0,
 				right:      1,
 				totalWrong: 0,
+				capacity:   1,
 			},
 			{
 				name:       "Detect correct characters in succession",
-				text:       "Test",
-				keystrokes: []rune("Tes"),
+				keystrokes: []Action{A_RIGHT, A_RIGHT, A_RIGHT},
 				wrong:      0,
 				right:      3,
 				totalWrong: 0,
+				capacity:   4,
 			},
 			{
 				name:       "On error all next keystrokes should be errors",
-				text:       "Abcd",
-				keystrokes: []rune("Bbc"),
+				capacity:   4,
+				keystrokes: []Action{A_WRONG, A_RIGHT, A_RIGHT},
 				wrong:      3,
 				right:      0,
 				totalWrong: 3,
 			},
 			{
 				name:       "Should delete wrong characters first",
-				text:       "Test string",
-				keystrokes: []rune("Tesss\b"),
+				keystrokes: []Action{A_RIGHT, A_RIGHT, A_RIGHT, A_WRONG, A_WRONG, A_BACKSPACE},
 				wrong:      1,
 				right:      3,
 				totalWrong: 2,
+				capacity:   8,
 			},
 			{
 				name:       "Should delete Wrong characters",
-				text:       "s",
-				keystrokes: []rune("a\b"),
+				keystrokes: []Action{A_WRONG, A_BACKSPACE},
 				wrong:      0,
 				right:      0,
 				totalWrong: 1,
+				capacity:   1,
 			},
 			{
 				name:       "Should not delete characters at start of function",
-				text:       "s",
-				keystrokes: []rune{'\b'},
+				keystrokes: []Action{A_BACKSPACE},
 				wrong:      0,
 				right:      0,
 				totalWrong: 0,
+				capacity:   1,
 			},
 		}
 
 		for _, tc := range tt {
 			t.Run(tc.name, func(t *testing.T) {
-				ct := KeystrokeCounter{Text: tc.text}
+				ct := KeystrokeCounter{Capacity: tc.capacity}
 
-				for _, k := range tc.keystrokes {
-					if k == '\b' {
+				for _, action := range tc.keystrokes {
+					switch action {
+					case A_RIGHT:
+						ct.InsKey(true)
+					case A_WRONG:
+						ct.InsKey(false)
+					case A_BACKSPACE:
 						ct.Backspace()
-					} else {
-						ct.InsKey(k)
 					}
 				}
 
 				if tc.wrong != ct.Wrong {
-					t.Errorf("Mismatched number of wrong characters: %d, expected %d", ct.Wrong, tc.wrong)
+					t.Errorf("%s, wrong characters: %d, expected %d", tc.name, ct.Wrong, tc.wrong)
 				}
 
 				if tc.right != ct.Right {
-					t.Errorf("Mismatched number of right characters: %d, expected %d", ct.Right, tc.right)
+					t.Errorf("%s, right characters: %d, expected %d", tc.name, ct.Right, tc.right)
 				}
 
 				if tc.totalWrong != ct.TotalWrong {
-					t.Errorf("%q, total wrong characters: %v, expected %v", tc.name, ct.TotalWrong, tc.totalWrong)
+					t.Errorf("%s, total wrong characters: %v, expected %v", tc.name, ct.TotalWrong, tc.totalWrong)
 				}
 			})
 		}
@@ -167,29 +170,25 @@ func TestCurrent(t *testing.T) {
 		tt := []struct {
 			name     string
 			duration string
-			text     string
-			typed    []rune
+			correct  int
 			expect   float64
 		}{
 			{
 				name:     "60cpm",
 				duration: "1s",
-				text:     "test",
-				typed:    []rune("t"),
+				correct:  1,
 				expect:   60,
 			},
 			{
 				name:     "1cpm",
 				duration: "1m",
-				text:     "a",
-				typed:    []rune("abcdefgehij"),
+				correct:  1,
 				expect:   1,
 			},
 			{
 				name:     "Start wpm",
 				duration: "0s",
-				text:     "test",
-				typed:    []rune("test"),
+				correct:  4,
 				expect:   0,
 			},
 		}
@@ -204,10 +203,7 @@ func TestCurrent(t *testing.T) {
 				}
 				end := start.Add(duration)
 
-				counter := KeystrokeCounter{Text: tc.text, Start: start}
-				for _, k := range tc.typed {
-					counter.InsKey(k)
-				}
+				counter := KeystrokeCounter{Right: tc.correct, Start: start}
 
 				got := counter.Cpm(end)
 				expect := tc.expect

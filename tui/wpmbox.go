@@ -1,8 +1,6 @@
 package tui
 
 import (
-	"strings"
-
 	"github.com/ale-cci/gopm/wpm"
 	"github.com/nsf/termbox-go"
 )
@@ -12,12 +10,12 @@ type WpmBox struct {
 	x, y int
 	w, h int
 
-	// Effective length of each line of the text
-	textStructure []int
+	// Effective length of each line of the Text
+	counter *wpm.KeystrokeCounter
+	pt      *ParsedText
 
 	// current line and position of cursor on the screen
-	line, cursor     int
-	KeystrokeCounter wpm.KeystrokeCounter
+	line, cursor int
 
 	// When number of line from margin where screen scrolling should start
 	ScrollOff int
@@ -27,35 +25,21 @@ type WpmBox struct {
 }
 
 // WpmBox constructor
-func NewWpmBox(x int, y int, w int, h int, text string) *WpmBox {
-	box := &WpmBox{x: x, y: y, w: w, h: h}
-	box.SetText(text)
+func NewWpmBox(x int, y int, w int, h int, pt *ParsedText, counter *wpm.KeystrokeCounter) *WpmBox {
+	box := &WpmBox{x: x, y: y, w: w, h: h, pt: pt, counter: counter}
+	box.Reset()
 	return box
 }
 
-// Set wpmbox text, update internal buffer
-func (w *WpmBox) SetText(text string) {
+func (wb *WpmBox) SetText(pt *ParsedText) {
+}
+
+// Set wpmbox Text, update internal buffer
+func (w *WpmBox) Reset() {
 	// Reset cursor position
 	w.cursor = 0
 	w.line = 0
 	w.offset = 0
-
-	w.KeystrokeCounter = wpm.KeystrokeCounter{Text: text}
-
-	lines := strings.Split(text, "\n")
-	w.textStructure = make([]int, len(lines))
-
-	for i, line := range lines {
-		// w.textStructure[i] = len(line)
-		for _, char := range line {
-			w.textStructure[i] += runeSize(char)
-		}
-
-		// new line character to all lines except last one
-		if i != len(lines)-1 {
-			w.textStructure[i] += 1
-		}
-	}
 }
 
 func runeSize(char rune) int {
@@ -67,7 +51,7 @@ func runeSize(char rune) int {
 }
 
 func (w *WpmBox) cellColor(currentChar int) CellColor {
-	val, ok := ColorMap()[w.KeystrokeCounter.CharStatus(currentChar)]
+	val, ok := ColorMap()[w.counter.CharStatus(currentChar)]
 
 	if !ok {
 		panic("Invalid cell state")
@@ -89,15 +73,15 @@ func (w *WpmBox) Draw() {
 
 	currentChar := 0
 	for l := 0; l < w.offset; l++ {
-		currentChar += w.textStructure[l]
+		currentChar += w.pt.Structure[l]
 	}
 
 	// Draw box content
-	for y := 0; y < min(w.h, len(w.textStructure)-w.offset); y++ {
-		for x := 0; x < w.textStructure[w.offset+y]; {
+	for y := 0; y < min(w.h, len(w.pt.Structure)-w.offset); y++ {
+		for x := 0; x < w.pt.Structure[w.offset+y]; {
 			color := w.cellColor(currentChar)
 
-			currChar := w.KeystrokeCounter.RuneAt(currentChar)
+			currChar := w.pt.RuneAt(currentChar)
 			parsedChar := parseRune(currChar)
 
 			termbox.SetCell(w.x+x, w.y+y, parsedChar, color.Fg, color.Bg)
@@ -111,26 +95,19 @@ func (w *WpmBox) Draw() {
 	// Draw cursor
 	termbox.SetCursor(w.x+w.cursor, w.y+w.line)
 }
+func (wb *WpmBox) currentRune() rune {
+	return wb.pt.RuneAt(wb.counter.Position())
+}
 
-func (w *WpmBox) InsKey(key rune) {
-	if w.KeystrokeCounter.IsEndPosition() {
+func (w *WpmBox) IncCursor() {
+	if w.counter.IsEndPosition() {
 		return
 	}
-
-	w.incCursor()
-	w.KeystrokeCounter.InsKey(key)
-}
-
-func (w *WpmBox) Backspace() {
-	w.KeystrokeCounter.Backspace()
-	w.decCursor()
-}
-
-func (w *WpmBox) incCursor() {
-	if w.KeystrokeCounter.CurrentRune() == '\n' {
+	prevRune := w.pt.RuneAt(w.counter.Position() - 1)
+	if prevRune == '\n' {
 		if w.h-w.line > w.ScrollOff {
 			w.line++
-		} else if w.line+w.offset+w.ScrollOff < len(w.textStructure)-1 {
+		} else if w.line+w.offset+w.ScrollOff < len(w.pt.Structure)-1 {
 			w.offset++
 		} else {
 			w.line++
@@ -138,12 +115,12 @@ func (w *WpmBox) incCursor() {
 
 		w.cursor = 0
 	} else {
-		w.cursor += runeSize(w.KeystrokeCounter.CurrentRune())
+		w.cursor += runeSize(prevRune)
 	}
 }
 
-func (w *WpmBox) decCursor() {
-	c := w.KeystrokeCounter.CurrentRune()
+func (w *WpmBox) DecCursor() {
+	c := w.currentRune()
 	if w.cursor > 0 {
 		w.cursor -= runeSize(c)
 	} else if w.line > 0 {
@@ -154,6 +131,6 @@ func (w *WpmBox) decCursor() {
 		} else {
 			w.line--
 		}
-		w.cursor = w.textStructure[w.line+w.offset] - 1
+		w.cursor = w.pt.Structure[w.line+w.offset] - 1
 	}
 }
