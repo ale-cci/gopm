@@ -1,6 +1,6 @@
 # Typing practice on command line
 
-![2020-08-27-160713_1918x1059_scrot](https://user-images.githubusercontent.com/24639564/91452952-7e8ecd80-e87f-11ea-86c6-926c6c00f4e8.png)
+![2020-08-29-214923_1918x1059_scrot](https://user-images.githubusercontent.com/24639564/91644991-a29a0c80-ea41-11ea-9051-315036ddb1cb.png)
 
 I love [cslarsen/wpm](https://github.com/cslarsen/wpm), i use it almost everyday! so i wanted to make my own version on golang.
 
