@@ -27,7 +27,7 @@ $ gopm test.txt test2.txt
 
 Or run it without building building the project
 ```
-go run gopm.go -- [...FILES]
+go run main.go -- [...FILES]
 ```
 
 ### Test
