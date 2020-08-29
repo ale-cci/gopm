@@ -36,5 +36,8 @@ $ go test ./...
 ```
 
 ### Keybindings
-| quit | \<Ctrl-c\> |
+| Action | Keystroke |
 |------|-------|
+| quit | \<Ctrl-c\> |
+| next | \<Ctrl-n\> |
+| previous | \<Ctrl-p\> |

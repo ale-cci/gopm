@@ -3,10 +3,11 @@ package wpm
 import "time"
 
 type KeystrokeCounter struct {
-	Text string
-	// Correct and wrong characters typed
-	correct, wrong int
-	Start          time.Time
+	Text            string
+	Right, Wrong    int
+	Start           time.Time
+	TotalWrong      int
+	TotalKeystrokes int
 }
 
 func (t *KeystrokeCounter) CurrentRune() rune {
@@ -18,24 +19,23 @@ func (t *KeystrokeCounter) RuneAt(position int) rune {
 }
 
 func (t *KeystrokeCounter) InsKey(char rune) {
-	if t.IsStartPosition() {
-		t.Start = time.Now()
-	}
 
 	if !t.IsEndPosition() {
 		current := t.CurrentRune()
 
-		if char == current && t.wrong == 0 {
-			t.correct += 1
+		if char == current && t.Wrong == 0 {
+			t.Right += 1
 		} else {
-			t.wrong += 1
+			t.Wrong += 1
+			t.TotalWrong += 1
 		}
+		t.TotalKeystrokes += 1
 	}
 }
 
 func (t *KeystrokeCounter) Cpm(now time.Time) float64 {
 	elapsed := now.Sub(t.Start)
-	typed := t.correct
+	typed := t.Right
 	time := elapsed.Minutes()
 
 	if time < 0.00001 {
@@ -48,32 +48,23 @@ func (t *KeystrokeCounter) Wpm(now time.Time) float64 {
 	return t.Cpm(now) / 5
 }
 
+func (t *KeystrokeCounter) Accuracy() float64 {
+	return float64(t.TotalKeystrokes-t.TotalWrong) * 100 / float64(t.TotalKeystrokes)
+}
+
 // Remove the last character inserted
 func (t *KeystrokeCounter) Backspace() {
 	if !t.IsStartPosition() {
-		if t.wrong > 0 {
-			t.wrong -= 1
+		if t.Wrong > 0 {
+			t.Wrong -= 1
 		} else {
-			t.correct -= 1
+			t.Right -= 1
 		}
 	}
 }
 
-// Return the status of the character at `position`
-// RIGHT, WRONG or BLANK if the character has not been typed yet
-func (t *KeystrokeCounter) CharStatus(position int) CharStatus {
-	switch {
-	case position < t.correct:
-		return RIGHT
-	case position >= t.correct && position < t.correct+t.wrong:
-		return WRONG
-	default:
-		return BLANK
-	}
-}
-
 func (t *KeystrokeCounter) Position() int {
-	return t.correct + t.wrong
+	return t.Right + t.Wrong
 }
 
 func (t *KeystrokeCounter) IsStartPosition() bool {
@@ -83,4 +74,17 @@ func (t *KeystrokeCounter) IsStartPosition() bool {
 // Has reached the end of the text
 func (t *KeystrokeCounter) IsEndPosition() bool {
 	return t.Position() == len(t.Text)
+}
+
+// Return the status of the character at `position`
+// RIGHT, WRONG or BLANK if the character has not been typed yet
+func (t *KeystrokeCounter) CharStatus(position int) CharStatus {
+	switch {
+	case position < t.Right:
+		return RIGHT
+	case position >= t.Right && position < t.Right+t.Wrong:
+		return WRONG
+	default:
+		return BLANK
+	}
 }

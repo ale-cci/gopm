@@ -20,8 +20,9 @@ func NewWpmBar(x, y, w, h int, counter *wpm.KeystrokeCounter) *WpmBar {
 func (w *WpmBar) Draw() {
 	DrawBox(w.x, w.y, w.w, w.h)
 	score := w.Counter.Wpm(time.Now())
+	acc := w.Counter.Accuracy()
 
-	runes := []rune(fmt.Sprintf("Wpm: %5.1f | Accuracy: TODO", score))
+	runes := []rune(fmt.Sprintf("Wpm: %5.1f | Accuracy: %5.1f", score, acc))
 	const colordef = termbox.ColorDefault
 
 	for x, char := range runes {

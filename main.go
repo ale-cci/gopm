@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/nsf/termbox-go"
 
@@ -12,12 +13,12 @@ import (
 )
 
 type App struct {
-	box *tui.WpmBox
-	ci  *chunk.ChunkIterator
+	box           *tui.WpmBox
+	chunkIterator *chunk.ChunkIterator
 }
 
 func (app *App) Build(maxX int, maxY int) []tui.Widget {
-	text := app.ci.Current()
+	text := app.chunkIterator.Current()
 	app.box = tui.NewWpmBox(1, 3, maxX-2, maxY-4, text)
 	app.box.ScrollOff = 4
 
@@ -40,10 +41,22 @@ func (app *App) OnEvent(ev termbox.Event) bool {
 		case termbox.KeyTab:
 			app.box.InsKey('\t')
 
+		case termbox.KeyCtrlN:
+			app.chunkIterator.Next()
+			app.box.SetText(app.chunkIterator.Current())
+
+		case termbox.KeyCtrlP:
+			app.chunkIterator.Prev()
+			app.box.SetText(app.chunkIterator.Current())
+
 		case termbox.KeyBackspace, termbox.KeyBackspace2:
 			app.box.Backspace()
+
 		default:
 			if ev.Ch != 0 {
+				if app.box.KeystrokeCounter.IsStartPosition() {
+					app.box.KeystrokeCounter.Start = time.Now()
+				}
 				app.box.InsKey(ev.Ch)
 			}
 		}
@@ -52,14 +65,14 @@ func (app *App) OnEvent(ev termbox.Event) bool {
 	}
 
 	if app.box.KeystrokeCounter.IsEndPosition() {
-		app.ci.Next()
-		app.box.SetText(app.ci.Current())
+		app.chunkIterator.Next()
+		app.box.SetText(app.chunkIterator.Current())
 	}
 	return false
 }
 
-func NewApp(ci *chunk.ChunkIterator) *App {
-	return &App{ci: ci}
+func NewApp(chunkIterator *chunk.ChunkIterator) *App {
+	return &App{chunkIterator: chunkIterator}
 }
 
 func main() {
@@ -86,8 +99,8 @@ func main() {
 		chunkedFiles[i] = chunk.NewChunkedFile(file, 40)
 	}
 
-	ci := &chunk.ChunkIterator{Files: chunkedFiles}
-	app := NewApp(ci)
+	chunkIterator := &chunk.ChunkIterator{Files: chunkedFiles}
+	app := NewApp(chunkIterator)
 
 	tui.Run(app)
 	return
