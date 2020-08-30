@@ -23,10 +23,8 @@ type App struct {
 func (app *App) Build(maxX int, maxY int) []tui.Widget {
 	app.counter = wpm.KeystrokeCounter{}
 
-	text := app.iterator.Current()
-	app.setText(text)
-
 	app.box = tui.NewWpmBox(1, 3, maxX-2, maxY-4, app.text, &app.counter)
+	app.reloadText()
 	app.box.ScrollOff = 4
 
 	return []tui.Widget{
@@ -35,17 +33,23 @@ func (app *App) Build(maxX int, maxY int) []tui.Widget {
 	}
 }
 
-func (app *App) setText(text string) {
-	app.text = tui.NewParsedText(text)
-	app.box.SetText(&app.text)
-	app.counter.Capacity = len(text)
+func (app *App) reloadText() {
+	text := app.iterator.Current()
 	app.counter.Reset()
+	app.counter.Capacity = len(text)
+
+	app.text = tui.NewParsedText(text)
+	app.box.SetText(app.text)
 }
 
 func (app *App) insKey(char rune) {
-	correct := app.text.RuneAt(app.counter.Position()) == char
-	app.counter.InsKey(correct)
+	if app.counter.IsStartPosition() {
+		app.counter.Start = time.Now()
+	}
+
+	correct := app.text.RuneAt(app.counter.Inserted()) == char
 	app.box.IncCursor()
+	app.counter.InsKey(correct)
 }
 
 func (app *App) OnEvent(ev termbox.Event) bool {
@@ -64,21 +68,18 @@ func (app *App) OnEvent(ev termbox.Event) bool {
 
 		case termbox.KeyCtrlN:
 			app.iterator.Next()
-			app.setText(app.iterator.Current())
+			app.reloadText()
 
 		case termbox.KeyCtrlP:
 			app.iterator.Prev()
-			app.setText(app.iterator.Current())
+			app.reloadText()
 
 		case termbox.KeyBackspace, termbox.KeyBackspace2:
-			app.counter.Backspace()
 			app.box.DecCursor()
+			app.counter.Backspace()
 
 		default:
 			if ev.Ch != 0 {
-				if app.counter.IsStartPosition() {
-					app.counter.Start = time.Now()
-				}
 				app.insKey(ev.Ch)
 			}
 		}
@@ -88,7 +89,7 @@ func (app *App) OnEvent(ev termbox.Event) bool {
 
 	if app.counter.IsEndPosition() {
 		app.iterator.Next()
-		app.setText(app.iterator.Current())
+		app.reloadText()
 	}
 	return false
 }

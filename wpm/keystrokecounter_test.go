@@ -127,6 +127,14 @@ func TestCurrent(t *testing.T) {
 				capacity:   1,
 			},
 			{
+				name:       "should delete all right and wrong characters",
+				keystrokes: []Action{A_RIGHT, A_RIGHT, A_WRONG, A_RIGHT, A_WRONG, A_BACKSPACE, A_BACKSPACE, A_BACKSPACE, A_BACKSPACE, A_BACKSPACE},
+				wrong:      0,
+				right:      0,
+				totalWrong: 3,
+				capacity:   8,
+			},
+			{
 				name:       "Should not delete characters at start of function",
 				keystrokes: []Action{A_BACKSPACE},
 				wrong:      0,

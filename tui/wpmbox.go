@@ -32,6 +32,8 @@ func NewWpmBox(x int, y int, w int, h int, pt *ParsedText, counter *wpm.Keystrok
 }
 
 func (wb *WpmBox) SetText(pt *ParsedText) {
+	wb.pt = pt
+	wb.Reset()
 }
 
 // Set wpmbox Text, update internal buffer
@@ -96,41 +98,42 @@ func (w *WpmBox) Draw() {
 	termbox.SetCursor(w.x+w.cursor, w.y+w.line)
 }
 func (wb *WpmBox) currentRune() rune {
-	return wb.pt.RuneAt(wb.counter.Position())
+	return wb.pt.RuneAt(wb.counter.Inserted())
 }
 
 func (w *WpmBox) IncCursor() {
 	if w.counter.IsEndPosition() {
 		return
 	}
-	prevRune := w.pt.RuneAt(w.counter.Position() - 1)
-	if prevRune == '\n' {
-		if w.h-w.line > w.ScrollOff {
-			w.line++
-		} else if w.line+w.offset+w.ScrollOff < len(w.pt.Structure)-1 {
-			w.offset++
-		} else {
-			w.line++
-		}
+	r := w.currentRune()
 
+	if r == '\n' {
+		if w.h-w.line > w.ScrollOff || w.line+w.offset > len(w.pt.Structure)-w.h {
+			w.line++
+		} else {
+			w.offset++
+		}
 		w.cursor = 0
 	} else {
-		w.cursor += runeSize(prevRune)
+		w.cursor += runeSize(r)
 	}
 }
 
 func (w *WpmBox) DecCursor() {
-	c := w.currentRune()
-	if w.cursor > 0 {
-		w.cursor -= runeSize(c)
-	} else if w.line > 0 {
-		if w.line-w.offset > w.ScrollOff {
-			w.line--
-		} else if w.offset > 0 {
-			w.offset--
-		} else {
-			w.line--
+	if !w.counter.IsStartPosition() {
+		c := w.pt.RuneAt(w.counter.Inserted() - 1)
+
+		if w.cursor > 0 {
+			w.cursor -= runeSize(c)
+		} else if w.line > 0 {
+			if w.line-w.offset > w.ScrollOff {
+				w.line--
+			} else if w.offset > 0 {
+				w.offset--
+			} else {
+				w.line--
+			}
+			w.cursor = w.pt.Structure[w.line+w.offset] - 1
 		}
-		w.cursor = w.pt.Structure[w.line+w.offset] - 1
 	}
 }

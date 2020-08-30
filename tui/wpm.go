@@ -17,6 +17,7 @@ type WpmBar struct {
 func NewWpmBar(x, y, w, h int, counter *wpm.KeystrokeCounter) *WpmBar {
 	return &WpmBar{Counter: counter, x: x, y: y, w: w, h: h}
 }
+
 func (w *WpmBar) Draw() {
 	DrawBox(w.x, w.y, w.w, w.h)
 	score := w.Counter.Wpm(time.Now())

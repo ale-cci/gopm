@@ -53,16 +53,16 @@ func (t *KeystrokeCounter) Backspace() {
 	}
 }
 
-func (t *KeystrokeCounter) Position() int {
+func (t *KeystrokeCounter) Inserted() int {
 	return t.Right + t.Wrong
 }
 
 func (t *KeystrokeCounter) IsStartPosition() bool {
-	return t.Position() == 0
+	return t.Inserted() == 0
 }
 
 func (t *KeystrokeCounter) IsEndPosition() bool {
-	return t.Position() == t.Capacity
+	return t.Inserted() == t.Capacity
 }
 
 // Return the status of the character at `position`
